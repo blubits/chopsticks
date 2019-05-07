@@ -10,21 +10,21 @@ class Player {
 
    public:
     Player(int player_number) : player_number(player_number), left(), right(){};
-    const Hand get_left_hand();
-    const Hand get_right_hand();
+    Hand get_left_hand();
+    Hand get_right_hand();
     void transfer(int fingers_left, int fingers_right);
     void attack(Player &other, char my_hand, char other_hand);
     bool is_dead();
     std::string to_string();
 };
 
-const Hand Player::get_left_hand() { return left; }
-const Hand Player::get_right_hand() { return right; }
+Hand Player::get_left_hand() { return left; }
+Hand Player::get_right_hand() { return right; }
 
 void Player::transfer(int fingers_left, int fingers_right) {
     if (is_dead()) return;
-    left.set_fingers_up(fingers_left);
-    right.set_fingers_up(fingers_right);
+    left.set_raised(fingers_left);
+    right.set_raised(fingers_right);
 }
 
 void Player::attack(Player &other, char my_hand, char other_hand) {
@@ -48,7 +48,7 @@ bool Player::is_dead() { return left.is_dead() && right.is_dead(); }
 
 std::string Player::to_string() {
     std::stringstream ans;
-    ans << "P" << player_number << " L:" << left.get_fingers_up()
-        << " R:" << right.get_fingers_up();
+    ans << "P" << player_number << " L:" << left.get_raised()
+        << " R:" << right.get_raised();
     return ans.str();
 }

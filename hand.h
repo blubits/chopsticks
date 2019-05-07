@@ -1,28 +1,37 @@
-class Hand {
-   private:
-    int num_of_fingers;
-    int fingers_up;
+class Appendage {
+   protected:
+    int max;
+    int raised;
 
    public:
-    Hand() : num_of_fingers(5), fingers_up(1){};
-    Hand(int num_of_fingers, int fingers_up)
-        : num_of_fingers(num_of_fingers), fingers_up(fingers_up){};
-    int get_num_of_fingers();
-    void set_fingers_up(int fingers);
-    int get_fingers_up();
-    void tap(const Hand& other);
-    bool is_dead();
+    Appendage();
+    Appendage(int max, int raised);
+    int get_max() const;
+    int get_raised() const;
+    void set_raised(int raised);
+    virtual void tap(const Appendage& other) = 0;
+    virtual bool is_dead() = 0;
 };
 
-int Hand::get_num_of_fingers() { return num_of_fingers; }
+Appendage::Appendage() : max(5), raised(1){};
 
-void Hand::set_fingers_up(int fingers) { fingers_up = fingers; }
+Appendage::Appendage(int max, int raised) : max(max), raised(raised){};
 
-int Hand::get_fingers_up() { return fingers_up; }
+int Appendage::get_max() const { return max; }
 
-void Hand::tap(const Hand& other) {
+int Appendage::get_raised() const { return raised; }
+
+void Appendage::set_raised(int raised) { this->raised = raised; }
+
+class Hand : public Appendage {
+   public:
+    virtual void tap(const Appendage& other);
+    virtual bool is_dead();
+};
+
+void Hand::tap(const Appendage& other) {
     if (is_dead()) return;
-    fingers_up = (fingers_up - 1 + other.fingers_up) % num_of_fingers + 1;
+    raised = (raised - 1 + other.get_raised()) % max + 1;
 }
 
-bool Hand::is_dead() { return num_of_fingers == fingers_up; }
+bool Hand::is_dead() { return raised == max; }
