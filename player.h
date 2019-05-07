@@ -8,11 +8,12 @@ class Player {
     int player_number;
     int player_team;
     char player_type;
+    bool turn_skipped;
     std::vector<Hand> hands;
-    std::vector<Feet> feet;
+    std::vector<Foot> feet;
 
    public:
-    Player(int player_number, int player_team, char player_type) : player_number(player_number), player_team(player_team), player_type(){};
+    Player(int player_number, int player_team, char player_type) : player_number(player_number), player_team(player_team), player_type(player_type){};
     void distribute_hands(std::vector<int> input);
     void distribute_feet(std::vector<int> input);
     void attack(Player &other, char my_hand, char other_hand);
@@ -20,11 +21,25 @@ class Player {
     std::string to_string();
 };
 
-// void Player::transfer(int fingers_left, int fingers_right) {
-//     if (is_dead()) return;
-//     left.set_raised(fingers_left);
-//     right.set_raised(fingers_right);
-// }
+void Player::distribute_hands(std::vector<int> input) {
+    auto i = input.begin();
+    auto j = hands.begin();
+    while (i != input.end() || j != hands.end()) {
+        j->set_raised((*i));
+        i++;
+        j++;
+    }
+}
+
+void Player::distribute_feet(std::vector<int> input) {
+    auto i = input.begin();
+    auto j = feet.begin();
+    while (i != input.end() || j != feet.end()) {
+        j->set_raised((*i));
+        i++;
+        j++;
+    }
+}
 
 // void Player::attack(Player &other, char my_hand, char other_hand) {
 //     if (is_dead()) return;
@@ -43,7 +58,15 @@ class Player {
 //     }
 // }
 
-// bool Player::is_dead() { return left.is_dead() && right.is_dead(); }
+bool Player::is_dead() {
+    for (auto i = hands.begin(); i != hands.end(); i++) {
+        if (!(i->is_dead())) return false;
+    }
+    for (auto i = feet.begin(); i != feet.end(); i++) {
+        if (!(i->is_dead())) return false;
+    }
+    return true;
+}
 
 // std::string Player::to_string() {
 //     std::stringstream ans;
