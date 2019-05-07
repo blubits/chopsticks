@@ -1,11 +1,15 @@
+#include <string>
+
 class Appendage {
    protected:
+    std::string name;
     int max;
     int raised;
 
    public:
-    Appendage();
-    Appendage(int max, int raised);
+    Appendage(std::string name);
+    Appendage(std::string name, int max, int raised);
+    std::string get_name() const;
     int get_max() const;
     int get_raised() const;
     void set_raised(int raised);
@@ -13,9 +17,12 @@ class Appendage {
     virtual bool is_dead() = 0;
 };
 
-Appendage::Appendage() : max(5), raised(1){};
+Appendage::Appendage(std::string name) : name(name), max(5), raised(1){};
 
-Appendage::Appendage(int max, int raised) : max(max), raised(raised){};
+Appendage::Appendage(std::string name, int max, int raised)
+    : name(name), max(max), raised(raised){};
+
+std::string Appendage::get_name() const { return name; }
 
 int Appendage::get_max() const { return max; }
 
