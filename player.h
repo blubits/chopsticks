@@ -8,22 +8,34 @@ class Player {
     int player_number;
     int player_team;
     char player_type;
-    const int num_hands = 0;
-    const int num_feet = 0;
-    const int fingers_max = 0;
-    const int toes_max = 0;
+    int num_hands = 0;
+    int num_feet = 0;
+    int fingers_max = 0;
+    int toes_max = 0;
     bool turn_skipped;
     std::vector<Hand> hands;
     std::vector<Foot> feet;
 
    public:
-    Player(int player_number, int player_team, char player_type) : player_number(player_number), player_team(player_team), player_type(player_type){};
+    Player(int player_number, int player_team, char player_type);
     void distribute_hands(std::vector<int> input);
     void distribute_feet(std::vector<int> input);
     void attack(Player &other, char my_hand, char other_hand);
     bool is_dead();
     std::string to_string();
 };
+
+Player::Player(int player_number, int player_team, char player_type) {
+    this->player_number = player_number;
+    this->player_team = player_team;
+    this->player_type = player_type;
+    for (int i = 0; i < num_hands; i++) {
+        hands.push_back(Hand(fingers_max, 0));
+    }
+    for (int i = 0; i < num_feet; i++) {
+        feet.push_back(Feet(toes_max, 0));
+    }
+}
 
 void Player::distribute_hands(std::vector<int> input) {
     auto i = input.begin();
@@ -81,28 +93,28 @@ std::string Player::to_string() {
 
 class Human : public Player {
    private:
-    const int num_hands = 2;
-    const int num_feet = 2;
-    const int fingers_max = 5;
-    const int toes_max = 5;
+    int num_hands = 2;
+    int num_feet = 2;
+    int fingers_max = 5;
+    int toes_max = 5;
 };
 
 class Alien : public Player {
    private:
-    const int num_hands = 4;
-    const int num_feet = 2;
-    const int fingers_max = 3;
-    const int toes_max = 2;
+    int num_hands = 4;
+    int num_feet = 2;
+    int fingers_max = 3;
+    int toes_max = 2;
 };
 
 class Zombie : public Player {
    private:
-    const int num_hands = 1;
-    const int fingers_max = 4;
+    int num_hands = 1;
+    int fingers_max = 4;
 };
 
 class Doggo : public Player {
    private:
-    const int num_feet = 4;
-    const int toes_max = 5;
+    int num_feet = 4;
+    int toes_max = 5;
 };
