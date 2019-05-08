@@ -8,10 +8,10 @@ class Player {
     int player_number;
     int player_team;
     char player_type;
-    int num_hands = 0;
-    int num_feet = 0;
-    int fingers_max = 0;
-    int toes_max = 0;
+    int num_hands;
+    int num_feet;
+    int fingers_max;
+    int toes_max;
     bool turn_skipped;
 
     std::vector<Hand> hands;
@@ -19,7 +19,8 @@ class Player {
 
    public:
     Player();
-    Player(int player_number, int player_team, char player_type);
+    // Player(int player_number, int player_team, char player_type) : player_number(player_number), player_team(player_team), player_type(player_type){};
+    Player(int player_number, int player_team, char player_type, int num_hands, int num_feet, int fingers_max, int toes_max);
     void distribute_hands(std::vector<int> input);
     void distribute_feet(std::vector<int> input);
     bool is_dead();
@@ -28,14 +29,19 @@ class Player {
 
 Player::Player(){};
 
-Player::Player(int player_number, int player_team, char player_type) {
+Player::Player(int player_number, int player_team, char player_type, int num_hands, int num_feet, int fingers_max, int toes_max) {
     this->player_number = player_number;
     this->player_team = player_team;
     this->player_type = player_type;
-    for (int i = 0; i < num_hands; i++) {
+    this->num_hands = num_hands;
+    this->num_feet = num_feet;
+    this->fingers_max = fingers_max;
+    this->toes_max = toes_max;
+
+    for (int i = 0; i < this->num_hands; i++) {
         hands.push_back(Hand(fingers_max, 0));
     }
-    for (int i = 0; i < num_feet; i++) {
+    for (int i = 0; i < this->num_feet; i++) {
         feet.push_back(Foot(toes_max, 0));
     }
 }
@@ -72,49 +78,43 @@ bool Player::is_dead() {
 
 std::string Player::to_string() {
     std::stringstream ans;
-    // ans << "P" << player_number << " L:" << left.get_raised()
-    //     << " R:" << right.get_raised();
+    ans << "P" << player_number << player_type << " (";
+    for (auto i : hands) {
+        if (i.is_dead()) {
+            ans << "X";
+        } else {
+            ans << i.get_raised();
+        }
+    }
+    for (auto i : feet) {
+        if (i.is_dead()) {
+            ans << "X";
+        } else {
+            ans << i.get_raised();
+        }
+    }
+    ans << ")";
     return ans.str();
 }
 
 class Human : public Player {
-   private:
-    int num_hands = 2;
-    int num_feet = 2;
-    int fingers_max = 5;
-    int toes_max = 5;
-
    public:
-    Human(int player_number, int player_team) : Player(player_team, player_number, 'h'){};
+    Human(int player_number, int player_team) : Player(player_number, player_number, 'h', 2, 2, 5, 5){};
 };
 
 class Alien : public Player {
-   private:
-    int num_hands = 4;
-    int num_feet = 2;
-    int fingers_max = 3;
-    int toes_max = 2;
-
    public:
-    Alien(int player_number, int player_team) : Player(player_team, player_number, 'a'){};
+    Alien(int player_number, int player_team) : Player(player_number, player_number, 'a', 4, 2, 3, 2){};
 };
 
 class Zombie : public Player {
-   private:
-    int num_hands = 1;
-    int fingers_max = 4;
-
    public:
-    Zombie(int player_number, int player_team) : Player(player_team, player_number, 'z'){};
+    Zombie(int player_number, int player_team) : Player(player_number, player_number, 'z', 1, 0, 4, 0){};
 };
 
 class Doggo : public Player {
-   private:
-    int num_feet = 4;
-    int toes_max = 5;
-
    public:
-    Doggo(int player_number, int player_team) : Player(player_team, player_number, 'd'){};
+    Doggo(int player_number, int player_team) : Player(player_number, player_number, 'd', 0, 4, 0, 4){};
 };
 
 class PlayerFactory {
