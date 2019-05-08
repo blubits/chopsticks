@@ -86,6 +86,7 @@ std::string Player::to_string() {
             ans << i.get_raised();
         }
     }
+    ans << ":";
     for (auto i : feet) {
         if (i.is_dead()) {
             ans << "X";
