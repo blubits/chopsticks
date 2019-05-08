@@ -20,7 +20,6 @@ class Player {
     Player(int player_number, int player_team, char player_type);
     void distribute_hands(std::vector<int> input);
     void distribute_feet(std::vector<int> input);
-    void attack(Player &other, char my_hand, char other_hand);
     bool is_dead();
     std::string to_string();
 };
@@ -57,22 +56,23 @@ void Player::distribute_feet(std::vector<int> input) {
     }
 }
 
-void Player::attack(Player &other, char my_hand, char other_hand) {
-    if (is_dead()) return;
-    if (my_hand == 'L') {
-        if (other_hand == 'L') {
-            // left.tap(other.get_left_hand());
-        } else if (other_hand == 'R') {
-            // left.tap(other.get_right_hand());
-        }
-    } else if (my_hand == 'R') {
-        if (other_hand == 'L') {
-            // right.tap(other.get_left_hand());
-        } else if (other_hand == 'R') {
-            // right.tap(other.get_right_hand());
-        }
-    }
-}
+// DEPRACATED
+// void Player::attack(Player &other, char my_hand, char other_hand) {
+//     if (is_dead()) return;
+//     if (my_hand == 'L') {
+//         if (other_hand == 'L') {
+//             // left.tap(other.get_left_hand());
+//         } else if (other_hand == 'R') {
+//             // left.tap(other.get_right_hand());
+//         }
+//     } else if (my_hand == 'R') {
+//         if (other_hand == 'L') {
+//             // right.tap(other.get_left_hand());
+//         } else if (other_hand == 'R') {
+//             // right.tap(other.get_right_hand());
+//         }
+//     }
+// }
 
 bool Player::is_dead() {
     for (auto i = hands.begin(); i != hands.end(); i++) {

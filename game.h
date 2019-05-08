@@ -27,9 +27,9 @@ void Game::move(std::string command) {
         char a, b;
         ss >> a >> b;
         if (turn % 2 == 0) {
-            p2.attack(p1, b, a);
+            // p2.attack(p1, b, a);
         } else {
-            p1.attack(p2, b, a);
+            // p1.attack(p2, b, a);
         }
     } else if (action == "change") {
         int a, b;
