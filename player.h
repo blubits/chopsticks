@@ -8,18 +8,18 @@ class Player {
     int player_number;
     int player_team;
     char player_type;
+
     int num_hands;
     int num_feet;
     int fingers_max;
     int toes_max;
-    bool turn_skipped;
-
     std::vector<Hand> hands;
     std::vector<Foot> feet;
 
+    bool turn_skipped = false;
+
    public:
     Player();
-    // Player(int player_number, int player_team, char player_type) : player_number(player_number), player_team(player_team), player_type(player_type){};
     Player(int player_number, int player_team, char player_type, int num_hands, int num_feet, int fingers_max, int toes_max);
     void distribute_hands(std::vector<int> input);
     void distribute_feet(std::vector<int> input);
