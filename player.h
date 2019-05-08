@@ -137,11 +137,13 @@ Player PlayerFactory::make_player(int player_number, int player_team, std::strin
 
 class Team {
    private:
+    int current_player_idx = 0;
     std::vector<Player *> players;
 
    public:
     Player *operator[](int index);
     Player *get_player(int index);
+    Player *current_player();
     void push_player(Player *player);
     bool is_dead();
 };
@@ -152,6 +154,12 @@ Player *Team::operator[](int index) {
 
 Player *Team::get_player(int index) {
     return players[index];
+}
+
+Player *Team::current_player() {
+    Player *current_player = players[current_player_idx];
+    current_player_idx++;
+    return current_player;
 }
 
 void Team::push_player(Player *player) {
