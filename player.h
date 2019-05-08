@@ -97,6 +97,9 @@ class Human : public Player {
     int num_feet = 2;
     int fingers_max = 5;
     int toes_max = 5;
+
+   public:
+    Human(int player_team, int player_number) : Player(player_team, player_number, 'h'){};
 };
 
 class Alien : public Player {
@@ -105,16 +108,25 @@ class Alien : public Player {
     int num_feet = 2;
     int fingers_max = 3;
     int toes_max = 2;
+
+   public:
+    Alien(int player_team, int player_number) : Player(player_team, player_number, 'a'){};
 };
 
 class Zombie : public Player {
    private:
     int num_hands = 1;
     int fingers_max = 4;
+
+   public:
+    Zombie(int player_team, int player_number) : Player(player_team, player_number, 'z'){};
 };
 
 class Doggo : public Player {
    private:
     int num_feet = 4;
     int toes_max = 5;
+
+   public:
+    Doggo(int player_team, int player_number) : Player(player_team, player_number, 'd'){};
 };
