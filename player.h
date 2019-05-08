@@ -33,7 +33,7 @@ Player::Player(int player_number, int player_team, char player_type) {
         hands.push_back(Hand(fingers_max, 0));
     }
     for (int i = 0; i < num_feet; i++) {
-        feet.push_back(Feet(toes_max, 0));
+        feet.push_back(Foot(toes_max, 0));
     }
 }
 
