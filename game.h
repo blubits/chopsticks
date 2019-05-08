@@ -12,7 +12,7 @@ class Game {
 
    public:
     Game() : ongoing(true), turn(0), won(-1){};
-    void push_player(int player_number, int player_team, int player_type);
+    void push_player(int player_number, int player_team, std::string player_type);
     void push_team();
     void move(std::string command);
     bool is_ongoing();
@@ -20,8 +20,10 @@ class Game {
     std::string to_string();
 };
 
-void Game::push_player(int player_number, int player_team, int player_type){
-
+void Game::push_player(int player_number, int player_team, std::string player_type) {
+    Player new_player = PlayerFactory::make_player(player_number, player_team, player_type);
+    players.push_back(new_player);
+    teams[player_team - 1].push_player(&(players.back()));
 };
 
 void Game::push_team() {
@@ -33,4 +35,5 @@ void Game::move(std::string command) {
 }
 
 bool Game::is_ongoing() { return ongoing; }
+
 int Game::who_won() { return won; }
