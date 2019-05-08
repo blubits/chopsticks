@@ -11,7 +11,7 @@ class Game {
     int won;
 
    public:
-    Game() : p1(1), p2(2), ongoing(true), turn(0), won(-1){};
+    Game() : p1(1, 1, 'H'), p2(2, 2, 'H'), ongoing(true), turn(0), won(-1){};
     void move(std::string command);
     bool is_ongoing();
     int who_won();
@@ -35,9 +35,9 @@ void Game::move(std::string command) {
         int a, b;
         ss >> a >> b;
         if (turn % 2 == 0) {
-            p1.transfer(a, b);
+            // p1.transfer(a, b);
         } else {
-            p2.transfer(a, b);
+            // p2.transfer(a, b);
         }
     }
     if (p1.is_dead()) {

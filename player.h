@@ -8,6 +8,10 @@ class Player {
     int player_number;
     int player_team;
     char player_type;
+    const int num_hands = 0;
+    const int num_feet = 0;
+    const int fingers_max = 0;
+    const int toes_max = 0;
     bool turn_skipped;
     std::vector<Hand> hands;
     std::vector<Foot> feet;
@@ -41,22 +45,22 @@ void Player::distribute_feet(std::vector<int> input) {
     }
 }
 
-// void Player::attack(Player &other, char my_hand, char other_hand) {
-//     if (is_dead()) return;
-//     if (my_hand == 'L') {
-//         if (other_hand == 'L') {
-//             left.tap(other.get_left_hand());
-//         } else if (other_hand == 'R') {
-//             left.tap(other.get_right_hand());
-//         }
-//     } else if (my_hand == 'R') {
-//         if (other_hand == 'L') {
-//             right.tap(other.get_left_hand());
-//         } else if (other_hand == 'R') {
-//             right.tap(other.get_right_hand());
-//         }
-//     }
-// }
+void Player::attack(Player &other, char my_hand, char other_hand) {
+    if (is_dead()) return;
+    if (my_hand == 'L') {
+        if (other_hand == 'L') {
+            // left.tap(other.get_left_hand());
+        } else if (other_hand == 'R') {
+            // left.tap(other.get_right_hand());
+        }
+    } else if (my_hand == 'R') {
+        if (other_hand == 'L') {
+            // right.tap(other.get_left_hand());
+        } else if (other_hand == 'R') {
+            // right.tap(other.get_right_hand());
+        }
+    }
+}
 
 bool Player::is_dead() {
     for (auto i = hands.begin(); i != hands.end(); i++) {
@@ -68,21 +72,37 @@ bool Player::is_dead() {
     return true;
 }
 
-// std::string Player::to_string() {
-//     std::stringstream ans;
-//     ans << "P" << player_number << " L:" << left.get_raised()
-//         << " R:" << right.get_raised();
-//     return ans.str();
-// }
+std::string Player::to_string() {
+    std::stringstream ans;
+    // ans << "P" << player_number << " L:" << left.get_raised()
+    //     << " R:" << right.get_raised();
+    return ans.str();
+}
 
 class Human : public Player {
+   private:
+    const int num_hands = 2;
+    const int num_feet = 2;
+    const int fingers_max = 5;
+    const int toes_max = 5;
 };
 
 class Alien : public Player {
+   private:
+    const int num_hands = 4;
+    const int num_feet = 2;
+    const int fingers_max = 3;
+    const int toes_max = 2;
 };
 
 class Zombie : public Player {
+   private:
+    const int num_hands = 1;
+    const int fingers_max = 4;
 };
 
 class Doggo : public Player {
+   private:
+    const int num_feet = 4;
+    const int toes_max = 5;
 };
