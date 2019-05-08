@@ -42,6 +42,7 @@ std::ostream& operator<<(std::ostream& os, const Appendage& dt) {
 
 class Hand : public Appendage {
    public:
+    using Appendage::Appendage;
     virtual void tap(const Appendage& other);
     virtual bool is_dead() const;
 };
@@ -55,6 +56,7 @@ bool Hand::is_dead() const { return raised == max; }
 
 class Foot : public Appendage {
    public:
+    using Appendage::Appendage;
     virtual void tap(const Appendage& other);
     virtual bool is_dead() const;
 };
