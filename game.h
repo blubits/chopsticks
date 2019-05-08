@@ -34,6 +34,14 @@ void Game::move(std::string command) {
     ;
 }
 
+std::string Game::to_string() {
+    std::stringstream ans;
+    for (int i = 0; i < teams.size(); i++) {
+        ans << "Team " << i + 1 << ": " << teams[i].to_string() << std::endl;
+    }
+    return ans.str();
+}
+
 bool Game::is_ongoing() { return ongoing; }
 
 int Game::who_won() { return won; }

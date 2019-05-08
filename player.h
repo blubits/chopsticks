@@ -78,6 +78,7 @@ bool Player::is_dead() {
 
 std::string Player::to_string() {
     std::stringstream ans;
+    std::cout << "Hands : " << num_hands << std::endl;
     ans << "P" << player_number << player_type << " (";
     for (auto i : hands) {
         if (i.is_dead()) {
@@ -100,22 +101,22 @@ std::string Player::to_string() {
 
 class Human : public Player {
    public:
-    Human(int player_number, int player_team) : Player(player_number, player_number, 'h', 2, 2, 5, 5){};
+    Human(int player_number, int player_team) : Player(player_number, player_team, 'h', 2, 2, 5, 5){};
 };
 
 class Alien : public Player {
    public:
-    Alien(int player_number, int player_team) : Player(player_number, player_number, 'a', 4, 2, 3, 2){};
+    Alien(int player_number, int player_team) : Player(player_number, player_team, 'a', 4, 2, 3, 2){};
 };
 
 class Zombie : public Player {
    public:
-    Zombie(int player_number, int player_team) : Player(player_number, player_number, 'z', 1, 0, 4, 0){};
+    Zombie(int player_number, int player_team) : Player(player_number, player_team, 'z', 1, 0, 4, 0){};
 };
 
 class Doggo : public Player {
    public:
-    Doggo(int player_number, int player_team) : Player(player_number, player_number, 'd', 0, 4, 0, 4){};
+    Doggo(int player_number, int player_team) : Player(player_number, player_team, 'd', 0, 4, 0, 4){};
 };
 
 class PlayerFactory {
@@ -147,6 +148,7 @@ class Team {
     Player *current_player();
     void push_player(Player *player);
     bool is_dead();
+    std::string to_string();
 };
 
 Player *Team::operator[](int index) {
@@ -174,4 +176,15 @@ bool Team::is_dead() {
         }
     }
     return true;
+}
+
+std::string Team::to_string() {
+    std::stringstream ans;
+    for (auto i : players) {
+        ans << i->to_string();
+        if (i != players.back()) {
+            ans << " | ";
+        }
+    }
+    return ans.str();
 }
