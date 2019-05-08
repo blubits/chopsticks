@@ -13,16 +13,20 @@ class Player {
     int fingers_max = 0;
     int toes_max = 0;
     bool turn_skipped;
+
     std::vector<Hand> hands;
     std::vector<Foot> feet;
 
    public:
+    Player();
     Player(int player_number, int player_team, char player_type);
     void distribute_hands(std::vector<int> input);
     void distribute_feet(std::vector<int> input);
     bool is_dead();
     std::string to_string();
 };
+
+Player::Player(){};
 
 Player::Player(int player_number, int player_team, char player_type) {
     this->player_number = player_number;
@@ -56,24 +60,6 @@ void Player::distribute_feet(std::vector<int> input) {
     }
 }
 
-// DEPRACATED
-// void Player::attack(Player &other, char my_hand, char other_hand) {
-//     if (is_dead()) return;
-//     if (my_hand == 'L') {
-//         if (other_hand == 'L') {
-//             // left.tap(other.get_left_hand());
-//         } else if (other_hand == 'R') {
-//             // left.tap(other.get_right_hand());
-//         }
-//     } else if (my_hand == 'R') {
-//         if (other_hand == 'L') {
-//             // right.tap(other.get_left_hand());
-//         } else if (other_hand == 'R') {
-//             // right.tap(other.get_right_hand());
-//         }
-//     }
-// }
-
 bool Player::is_dead() {
     for (auto i = hands.begin(); i != hands.end(); i++) {
         if (!(i->is_dead())) return false;
@@ -99,7 +85,7 @@ class Human : public Player {
     int toes_max = 5;
 
    public:
-    Human(int player_team, int player_number) : Player(player_team, player_number, 'h'){};
+    Human(int player_number, int player_team) : Player(player_team, player_number, 'h'){};
 };
 
 class Alien : public Player {
@@ -110,7 +96,7 @@ class Alien : public Player {
     int toes_max = 2;
 
    public:
-    Alien(int player_team, int player_number) : Player(player_team, player_number, 'a'){};
+    Alien(int player_number, int player_team) : Player(player_team, player_number, 'a'){};
 };
 
 class Zombie : public Player {
@@ -119,7 +105,7 @@ class Zombie : public Player {
     int fingers_max = 4;
 
    public:
-    Zombie(int player_team, int player_number) : Player(player_team, player_number, 'z'){};
+    Zombie(int player_number, int player_team) : Player(player_team, player_number, 'z'){};
 };
 
 class Doggo : public Player {
@@ -128,5 +114,55 @@ class Doggo : public Player {
     int toes_max = 5;
 
    public:
-    Doggo(int player_team, int player_number) : Player(player_team, player_number, 'd'){};
+    Doggo(int player_number, int player_team) : Player(player_team, player_number, 'd'){};
 };
+
+class PlayerFactory {
+   public:
+    static Player make_player(int player_number, int player_team, std::string player_type);
+};
+
+Player PlayerFactory::make_player(int player_number, int player_team, std::string player_type) {
+    if (player_type == "human") {
+        return Human(player_number, player_team);
+    } else if (player_type == "alien") {
+        return Alien(player_number, player_team);
+    } else if (player_type == "zombie") {
+        return Zombie(player_number, player_team);
+    } else if (player_type == "doggo") {
+        return Doggo(player_number, player_team);
+    };
+    return Player();
+};
+
+class Team {
+   private:
+    std::vector<Player *> players;
+
+   public:
+    Player *operator[](int index);
+    Player *get_player(int index);
+    void push_player(Player *player);
+    bool is_dead();
+};
+
+Player *Team::operator[](int index) {
+    return players[index];
+}
+
+Player *Team::get_player(int index) {
+    return players[index];
+}
+
+void Team::push_player(Player *player) {
+    players.push_back(player);
+}
+
+bool Team::is_dead() {
+    for (auto i : players) {
+        if (!(i->is_dead())) {
+            return false;
+        }
+    }
+    return true;
+}
