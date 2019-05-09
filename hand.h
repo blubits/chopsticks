@@ -15,8 +15,8 @@ class Appendage {
     void set_raised(int raised);
 
     // Abstract functions; override in subclasses
-    virtual void tap(const Appendage& other) = 0;
-    virtual bool is_dead() const = 0;
+    virtual void tap(const Appendage& other);
+    virtual bool is_dead() const;
 
     friend std::ostream& operator<<(std::ostream& os, const Appendage& dt);
 };

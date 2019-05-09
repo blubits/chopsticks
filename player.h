@@ -1,190 +1,113 @@
-#include <sstream>
+#include <ostream>
 #include <string>
 #include <vector>
 #include "hand.h"
+#include "playerinfo.h"
 
 class Player {
    private:
     int player_number;
-    int player_team;
     char player_type;
+    const PlayerInfo *player_info;
 
-    int num_hands;
-    int num_feet;
-    int fingers_max;
-    int toes_max;
-    std::vector<Hand> hands;
-    std::vector<Foot> feet;
+    std::vector<Hand *> hands;
+    std::vector<Foot *> feet;
 
     bool turn_skipped = false;
 
    public:
-    Player();
-    Player(int player_number, int player_team, char player_type, int num_hands, int num_feet, int fingers_max, int toes_max);
+    Player(int player_number, char player_type, const PlayerInfo *player_info);
     void distribute_hands(std::vector<int> input);
     void distribute_feet(std::vector<int> input);
     bool is_dead();
+
+    // Abstract functions: override in subclasses
+    virtual void get_tapped_by(Appendage appendage);
+
+    friend std::ostream &operator<<(std::ostream &os, const Player &dt);
     std::string to_string();
 };
 
-Player::Player(){};
-
-Player::Player(int player_number, int player_team, char player_type, int num_hands, int num_feet, int fingers_max, int toes_max) {
-    this->player_number = player_number;
-    this->player_team = player_team;
-    this->player_type = player_type;
-    this->num_hands = num_hands;
-    this->num_feet = num_feet;
-    this->fingers_max = fingers_max;
-    this->toes_max = toes_max;
-
-    for (int i = 0; i < this->num_hands; i++) {
-        hands.push_back(Hand(fingers_max, 0));
+Player::Player(int player_number, char player_type,
+               const PlayerInfo *player_info)
+    : player_number(player_number),
+      player_type(player_type),
+      player_info(player_info) {
+    for (int i = 0; i < player_info->num_hands; i++) {
+        hands.push_back(new Hand(player_info->num_fingers, 0));
     }
-    for (int i = 0; i < this->num_feet; i++) {
-        feet.push_back(Foot(toes_max, 0));
+    for (int i = 0; i < player_info->num_feet; i++) {
+        feet.push_back(new Foot(player_info->num_toes, 0));
     }
 }
 
 void Player::distribute_hands(std::vector<int> input) {
-    auto i = input.begin();
-    auto j = hands.begin();
-    while (i != input.end() || j != hands.end()) {
-        j->set_raised((*i));
-        i++;
-        j++;
+    int i = 0;
+    for (auto &hi : input) {
+        hands.at(i++)->set_raised(hi);
     }
 }
 
 void Player::distribute_feet(std::vector<int> input) {
-    auto i = input.begin();
-    auto j = feet.begin();
-    while (i != input.end() || j != feet.end()) {
-        j->set_raised((*i));
-        i++;
-        j++;
+    int i = 0;
+    for (auto &hi : input) {
+        feet.at(i++)->set_raised(hi);
     }
 }
 
 bool Player::is_dead() {
-    for (auto i = hands.begin(); i != hands.end(); i++) {
-        if (!(i->is_dead())) return false;
+    for (auto &h : hands) {
+        if (!h->is_dead()) return false;
     }
-    for (auto i = feet.begin(); i != feet.end(); i++) {
-        if (!(i->is_dead())) return false;
+    for (auto &f : feet) {
+        if (!f->is_dead()) return false;
     }
     return true;
 }
 
-std::string Player::to_string() {
-    std::stringstream ans;
-    std::cout << "Hands : " << num_hands << std::endl;
-    ans << "P" << player_number << player_type << " (";
-    for (auto i : hands) {
-        if (i.is_dead()) {
-            ans << "X";
-        } else {
-            ans << i.get_raised();
-        }
-    }
-    ans << ":";
-    for (auto i : feet) {
-        if (i.is_dead()) {
-            ans << "X";
-        } else {
-            ans << i.get_raised();
-        }
-    }
-    ans << ")";
-    return ans.str();
+std::ostream &operator<<(std::ostream &os, const Player &dt) {
+    os << "P" << dt.player_number << dt.player_type << " (";
+    for (auto &h : dt.hands) os << h;
+    os << ":";
+    for (auto &f : dt.feet) os << f;
+    os << ")";
+    return os;
 }
 
 class Human : public Player {
    public:
-    Human(int player_number, int player_team) : Player(player_number, player_team, 'h', 2, 2, 5, 5){};
+    Human(int player_number) : Player(player_number, 'h', &HUMAN_INFO){};
 };
 
 class Alien : public Player {
    public:
-    Alien(int player_number, int player_team) : Player(player_number, player_team, 'a', 4, 2, 3, 2){};
+    Alien(int player_number) : Player(player_number, 'a', &ALIEN_INFO){};
 };
 
 class Zombie : public Player {
    public:
-    Zombie(int player_number, int player_team) : Player(player_number, player_team, 'z', 1, 0, 4, 0){};
+    Zombie(int player_number) : Player(player_number, 'z', &ZOMBIE_INFO){};
 };
 
 class Doggo : public Player {
    public:
-    Doggo(int player_number, int player_team) : Player(player_number, player_team, 'd', 0, 4, 0, 4){};
+    Doggo(int player_number) : Player(player_number, 'd', &DOGGO_INFO){};
 };
 
 class PlayerFactory {
    public:
-    static Player make_player(int player_number, int player_team, std::string player_type);
+    static Player *make_player(int player_number, std::string player_type);
 };
 
-Player PlayerFactory::make_player(int player_number, int player_team, std::string player_type) {
+Player *PlayerFactory::make_player(int player_number, std::string player_type) {
     if (player_type == "human") {
-        return Human(player_number, player_team);
+        return new Human(player_number);
     } else if (player_type == "alien") {
-        return Alien(player_number, player_team);
+        return new Alien(player_number);
     } else if (player_type == "zombie") {
-        return Zombie(player_number, player_team);
+        return new Zombie(player_number);
     } else if (player_type == "doggo") {
-        return Doggo(player_number, player_team);
+        return new Doggo(player_number);
     };
-    return Player();
+    return nullptr;
 };
-
-class Team {
-   private:
-    int current_player_idx = 0;
-    std::vector<Player *> players;
-
-   public:
-    Player *operator[](int index);
-    Player *get_player(int index);
-    Player *current_player();
-    void push_player(Player *player);
-    bool is_dead();
-    std::string to_string();
-};
-
-Player *Team::operator[](int index) {
-    return players[index];
-}
-
-Player *Team::get_player(int index) {
-    return players[index];
-}
-
-Player *Team::current_player() {
-    Player *current_player = players[current_player_idx];
-    current_player_idx++;
-    return current_player;
-}
-
-void Team::push_player(Player *player) {
-    players.push_back(player);
-}
-
-bool Team::is_dead() {
-    for (auto i : players) {
-        if (!(i->is_dead())) {
-            return false;
-        }
-    }
-    return true;
-}
-
-std::string Team::to_string() {
-    std::stringstream ans;
-    for (auto i : players) {
-        ans << i->to_string();
-        if (i != players.back()) {
-            ans << " | ";
-        }
-    }
-    return ans.str();
-}
