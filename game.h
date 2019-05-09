@@ -1,11 +1,11 @@
 #include <sstream>
 #include <string>
-#include "player.h"
+#include "team.h"
 
 class Game {
    private:
-    std::vector<Player> players;
-    std::vector<Team> teams;
+    std::vector<Player *> players;
+    std::vector<Team *> teams;
     bool ongoing;
     int turn;
     int won;
@@ -21,13 +21,13 @@ class Game {
 };
 
 void Game::push_player(int player_number, int player_team, std::string player_type) {
-    Player new_player = PlayerFactory::make_player(player_number, player_team, player_type);
+    Player *new_player = PlayerFactory::make_player(player_number, player_type);
     players.push_back(new_player);
-    teams[player_team - 1].push_player(&(players.back()));
+    teams[player_team - 1]->push_player(players.back());
 };
 
 void Game::push_team() {
-    teams.push_back(Team());
+    teams.push_back(new Team());
 }
 
 void Game::move(std::string command) {
@@ -37,7 +37,7 @@ void Game::move(std::string command) {
 std::string Game::to_string() {
     std::stringstream ans;
     for (int i = 0; i < teams.size(); i++) {
-        ans << "Team " << i + 1 << ": " << teams[i].to_string() << std::endl;
+        ans << "Team " << i + 1 << ": " << teams[i]->to_string() << std::endl;
     }
     return ans.str();
 }
