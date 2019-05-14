@@ -15,8 +15,8 @@ class Appendage {
     void set_raised(int raised);
 
     // Abstract functions; override in subclasses
-    virtual void tap(const Appendage& other);
-    virtual bool is_dead() const;
+    virtual void tap(const Appendage& other) = 0;
+    virtual bool is_dead() const = 0;
 
     friend std::ostream& operator<<(std::ostream& os, const Appendage& dt);
 };
@@ -43,8 +43,8 @@ std::ostream& operator<<(std::ostream& os, const Appendage& dt) {
 class Hand : public Appendage {
    public:
     using Appendage::Appendage;
-    virtual void tap(const Appendage& other);
-    virtual bool is_dead() const;
+    void tap(const Appendage& other);
+    bool is_dead() const;
 };
 
 void Hand::tap(const Appendage& other) {
@@ -57,8 +57,8 @@ bool Hand::is_dead() const { return raised == max; }
 class Foot : public Appendage {
    public:
     using Appendage::Appendage;
-    virtual void tap(const Appendage& other);
-    virtual bool is_dead() const;
+    void tap(const Appendage& other);
+    bool is_dead() const;
 };
 
 void Foot::tap(const Appendage& other) {

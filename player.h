@@ -17,16 +17,22 @@ class Player {
 
    public:
     Player(int player_number, char player_type, const PlayerInfo *player_info);
+    Hand &get_hand(int i);
+    Foot &get_foot(int i);
     void distribute_hands(std::vector<int> input);
     void distribute_feet(std::vector<int> input);
     bool is_dead();
 
     // Abstract functions: override in subclasses
-    virtual void get_tapped_by(Appendage appendage);
+    virtual void get_tapped_by(Appendage &my_appendage, Player &player,
+                               Appendage &player_appendage) = 0;
 
     friend std::ostream &operator<<(std::ostream &os, const Player &dt);
     std::string to_string();
 };
+
+giant_donggo.get_tapped_by(giant_donggo.get_foot(5), zombie,
+                           zombie.get_hand(5));
 
 Player::Player(int player_number, char player_type,
                const PlayerInfo *player_info)
@@ -76,8 +82,13 @@ std::ostream &operator<<(std::ostream &os, const Player &dt) {
 
 class Human : public Player {
    public:
-    Human(int player_number) : Player(player_number, 'h', &HUMAN_INFO){};
+    Human(int player_number);
+    void get_tapped_by(Player &player, Appendage &appendage);
 };
+
+Human::Human(int player_number) : Player(player_number, 'h', &HUMAN_INFO){};
+
+Human::get_tapped_by(Player &player, Appendage &appendage) {}
 
 class Alien : public Player {
    public:
