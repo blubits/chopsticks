@@ -1,8 +1,8 @@
 #include <ostream>
 #include <string>
 #include <vector>
-#include "hand.h"
 #include "playerinfo.h"
+#include "tapper.h"
 
 class Player {
    private:
@@ -30,9 +30,6 @@ class Player {
     friend std::ostream &operator<<(std::ostream &os, const Player &dt);
     std::string to_string();
 };
-
-giant_donggo.get_tapped_by(giant_donggo.get_foot(5), zombie,
-                           zombie.get_hand(5));
 
 Player::Player(int player_number, char player_type,
                const PlayerInfo *player_info)
@@ -88,7 +85,7 @@ class Human : public Player {
 
 Human::Human(int player_number) : Player(player_number, 'h', &HUMAN_INFO){};
 
-Human::get_tapped_by(Player &player, Appendage &appendage) {}
+void Human::get_tapped_by(Player &player, Appendage &appendage) { ; }
 
 class Alien : public Player {
    public:
