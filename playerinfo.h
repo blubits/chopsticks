@@ -1,9 +1,7 @@
-//
-// Info on a player's appendages.
-//
 // @author Maded Batara III (blubits)
 // @date 2019-05-16
 
+// Info on a player's appendages.
 struct PlayerInfo {
     int num_hands;
     int num_feet;
