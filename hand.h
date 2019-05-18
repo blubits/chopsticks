@@ -4,8 +4,13 @@
 // @author Maded Batara III (blubits)
 // @date 2019-05-16
 
+#ifndef HAND_H
+#define HAND_H
+
+#include <iostream>
 #include <ostream>
 #include <string>
+#include "player.h"
 
 // Represents the appendages of a certain player.
 // The Appendage class is a semi-abstract class; appendage subclasses
@@ -19,9 +24,11 @@ class Appendage {
    public:
     Appendage();
     Appendage(int raised, int max);
-    std::string get_name() const;
     int get_raised() const;
     int get_max() const;
+    void set_raised(int digits);
+    std::string to_string();
+    void tap(Appendage* tap_target);
 
     // Add additional raised digits to the appendage. Can only
     // be done as long as the appendage is still alive.
@@ -38,9 +45,21 @@ Appendage::Appendage() : raised(1), max(5){};
 
 Appendage::Appendage(int raised, int max) : raised(raised), max(max){};
 
+void Appendage::tap(Appendage* tap_target) {
+    if (tap_target->is_dead()) {
+        return;
+    }
+    tap_target->add_digits(this->raised);
+}
+
 int Appendage::get_max() const { return max; }
 
 int Appendage::get_raised() const { return raised; }
+
+void Appendage::set_raised(int digits) {
+    if (is_dead()) return;
+    raised = digits;
+}
 
 std::ostream& operator<<(std::ostream& os, const Appendage& dt) {
     if (dt.is_dead()) {
@@ -63,7 +82,7 @@ class Hand : public Appendage {
 
 void Hand::add_digits(int digits) {
     if (is_dead()) return;
-    raised = (raised - 1 + other.get_raised()) % max + 1;
+    raised = (raised - 1 + digits) % max + 1;
 }
 
 bool Hand::is_dead() const { return raised == max; }
@@ -85,3 +104,5 @@ void Foot::add_digits(int digits) {
 }
 
 bool Foot::is_dead() const { return raised >= max; }
+
+#endif
