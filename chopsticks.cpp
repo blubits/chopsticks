@@ -26,11 +26,12 @@ int main() {
     }
 
     string command;
+    cin.ignore();
     cout << g.to_string() << endl;
 
-    return 0;
     while (getline(cin, command)) {
         g.move(command);
+        cout << command << endl;
         cout << g.to_string() << endl;
         if (!g.is_ongoing()) {
             cout << "Player " << g.who_won() << " wins" << endl;
