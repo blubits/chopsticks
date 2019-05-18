@@ -15,7 +15,7 @@
 
 // Represents a game player.
 class Player {
-   private:
+   protected:
     int player_team;
     int player_order;
     char player_type;
@@ -37,8 +37,10 @@ class Player {
     bool has_turn();
     void set_turn(bool t);
 
+    void update_tapper(Player *tapper);
+    void update_tapped(Player *tapped);
+
     // Abstract functions: override in subclasses
-    // virtual void get_tapped();
 
     friend std::ostream &operator<<(std::ostream &os, const Player &dt);
     std::string to_string();
@@ -55,6 +57,14 @@ Player::Player(int player_order, char player_type,
     for (int i = 0; i < player_info->num_feet; i++) {
         feet.push_back(new Foot(1, player_info->num_toes));
     }
+}
+
+void Player::update_tapper(Player *tapper) {
+    ;
+}
+
+void Player::update_tapped(Player *tapped) {
+    ;
 }
 
 Hand *Player::get_hand(int i) {
@@ -109,7 +119,6 @@ void Player::set_turn(bool t) {
 class Human : public Player {
    public:
     Human(int player_order);
-    void get_tapped_by(Player &player, Appendage &appendage);
 };
 
 Human::Human(int player_order) : Player(player_order, 'h', &HUMAN_INFO){};
@@ -120,13 +129,29 @@ class Alien : public Player {
 };
 
 class Zombie : public Player {
+   private:
+    bool has_respawn = true;
+
    public:
     Zombie(int player_order) : Player(player_order, 'z', &ZOMBIE_INFO){};
+    void update_tapped(Player *player);
 };
+
+void Zombie::update_tapped(Player *player) {
+    if (this->get_hand(0)->is_dead() && has_respawn) {
+        has_respawn = false;
+        hands.push_back(new Hand(1, 4));
+    }
+}
 
 class Doggo : public Player {
    public:
     Doggo(int player_order) : Player(player_order, 'd', &DOGGO_INFO){};
+    void update_tapper(Player *tapper);
+};
+
+void Doggo::update_tapper(Player *tapper) {
+    tapper->set_turn(false);
 };
 
 class PlayerFactory {

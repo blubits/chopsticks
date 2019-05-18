@@ -45,6 +45,8 @@ Player *Game::get_current_player() {
         current_player = current_team->get_current_player();
         if (current_player->has_turn()) {
             break;
+        } else {
+            current_player->set_turn(true);
         }
     }
     team++;
@@ -94,6 +96,9 @@ void Game::move(std::string command) {
         }
 
         source_appendage->tap(target_appendage);
+        current_player->update_tapped(target_player);
+        target_player->update_tapper(current_player);
+
     } else if (cmd == "disthands") {
         int x;
         std::vector<int> ix;
