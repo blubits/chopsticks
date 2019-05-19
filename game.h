@@ -39,6 +39,7 @@ void Game::push_team() {
 
 Player *Game::get_current_player() {
     Team *current_team = teams[team];
+    // std::cout << current_team->to_string() << std::endl;
     Player *current_player;
     int i = 0;
     for (; i < current_team->size(); i++) {
@@ -61,7 +62,10 @@ Player *Game::get_current_player() {
 }
 
 void Game::move(std::string command) {
+    std::cout << "FUCK" << std::endl;
     Player *current_player = get_current_player();
+    std::cout << "Turn: ";
+    std::cout << *current_player << std::endl;
 
     std::stringstream ss(command);
     std::string cmd;
@@ -81,24 +85,25 @@ void Game::move(std::string command) {
 
         Player *target_player = players[target_player_idx];
 
-        Appendage *target_appendage;
+        Appendage *target_appendage = nullptr;
         if (target_appendage_type == 'H') {
             target_appendage = target_player->get_hand(target_appendage_idx);
         } else if (target_appendage_type == 'F') {
             target_appendage = target_player->get_foot(target_appendage_idx);
         }
 
-        Appendage *source_appendage;
+        Appendage *source_appendage = nullptr;
         if (source_appendage_type == 'H') {
             source_appendage = current_player->get_hand(source_appendage_idx);
         } else if (target_appendage_type == 'F') {
             source_appendage = current_player->get_foot(source_appendage_idx);
         }
 
+        //std::cout << source_appendage << " " << target_appendage << std::endl;
         source_appendage->tap(target_appendage);
         current_player->update_tapped(target_player, target_appendage);
         target_player->update_tapper(current_player, source_appendage);
-
+        current_player->use_action();
     } else if (cmd == "disthands") {
         int x;
         std::vector<int> ix;

@@ -56,7 +56,8 @@ void Appendage::tap(Appendage* tap_target) {
     if (tap_target->is_dead()) {
         return;
     }
-    tap_target->add_digits(this->raised);
+    std::cout << type << " " << raised << std::endl;
+    tap_target->add_digits(raised);
     if (tap_target->is_dead()) {
         tap_target->died = true;
     }
@@ -103,6 +104,7 @@ class Hand : public Appendage {
 void Hand::add_digits(int digits) {
     if (is_dead()) return;
     raised = (raised - 1 + digits) % max + 1;
+    std::cout << raised << " " << digits << std::endl;
 }
 
 bool Hand::is_dead() const { return raised == max; }
