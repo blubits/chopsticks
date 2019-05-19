@@ -24,7 +24,8 @@ class Player {
     std::vector<Hand *> hands;
     std::vector<Foot *> feet;
 
-    bool turn = true;
+    bool turn;
+    int actions_remaining;
 
    public:
     Player(int player_order, char player_type,
@@ -36,6 +37,8 @@ class Player {
     bool is_dead();
     bool has_turn();
     void set_turn(bool t);
+    bool has_actions();
+    void use_action();
 
     void update_tapper(Player *tapper);
     void update_tapped(Player *tapped);
@@ -50,7 +53,9 @@ Player::Player(int player_order, char player_type,
                const PlayerInfo *player_info)
     : player_order(player_order),
       player_type(player_type),
-      player_info(player_info) {
+      player_info(player_info),
+      turn(true),
+      actions_remaining(player_info->num_actions) {
     for (int i = 0; i < player_info->num_hands; i++) {
         hands.push_back(new Hand(1, player_info->num_fingers));
     }
@@ -114,6 +119,18 @@ bool Player::has_turn() {
 
 void Player::set_turn(bool t) {
     turn = t;
+}
+
+bool Player::has_actions() {
+    return actions_remaining != 0;
+}
+
+void Player::use_action() {
+    if (!has_turn()) return;
+    actions_remaining--;
+    if (actions_remaining == 0) {
+        actions_remaining = player_info->num_actions;
+    }
 }
 
 class Human : public Player {
