@@ -20,21 +20,20 @@ int main() {
     for (int i = 1; i < p + 1; i++) {
         string player_type;
         int player_team;
-
         cin >> player_type >> player_team;
-        g.push_player(i, player_team, player_type);
+        g.push_player(player_team - 1, player_type);
     }
 
-    string command;
     cin.ignore();
-    cout << g.to_string() << endl;
+    g.start_game();
+    cout << g << endl;
 
+    string command;
     while (getline(cin, command)) {
         g.move(command);
-        cout << command << endl;
-        cout << g.to_string() << endl;
+        cout << g << endl;
         if (!g.is_ongoing()) {
-            cout << "Player " << g.who_won() << " wins" << endl;
+            cout << "Team " << g.who_won() + 1 << " wins!" << endl;
             break;
         }
     }

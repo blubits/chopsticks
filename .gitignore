@@ -1,6 +1,11 @@
 .vscode/*
 *.in
 *.out
+*.ans
+chopsticks
+error
+main
+merge.py
 
 # Prerequisites
 *.d
