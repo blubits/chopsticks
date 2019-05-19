@@ -40,8 +40,8 @@ class Player {
     bool has_actions();
     void use_action();
 
-    void update_tapper(Player *tapper);
-    void update_tapped(Player *tapped);
+    void update_tapper(Player *tapper, Appendage *source_appendage);
+    void update_tapped(Player *tapped, Appendage *target_appendage);
 
     // Abstract functions: override in subclasses
 
@@ -64,12 +64,14 @@ Player::Player(int player_order, char player_type,
     }
 }
 
-void Player::update_tapper(Player *tapper) {
+void Player::update_tapper(Player *tapper, Appendage *source_appendage) {
     ;
 }
 
-void Player::update_tapped(Player *tapped) {
-    ;
+void Player::update_tapped(Player *tapped, Appendage *target_appendage) {
+    if (target_appendage->just_died() && target_appendage->get_type() == 'F') {
+        tapped->set_turn(false);
+    }
 }
 
 Hand *Player::get_hand(int i) {
@@ -143,7 +145,15 @@ Human::Human(int player_order) : Player(player_order, 'h', &HUMAN_INFO){};
 class Alien : public Player {
    public:
     Alien(int player_order) : Player(player_order, 'a', &ALIEN_INFO){};
+    void update_tapper(Player *player, Appendage *source_appendage);
 };
+
+void Alien::update_tapper(Player *player, Appendage *source_appendage) {
+    if (is_dead()) {
+        return;
+    }
+    this->turn = true;
+}
 
 class Zombie : public Player {
    private:
@@ -151,10 +161,10 @@ class Zombie : public Player {
 
    public:
     Zombie(int player_order) : Player(player_order, 'z', &ZOMBIE_INFO){};
-    void update_tapped(Player *player);
+    void update_tapper(Player *player);
 };
 
-void Zombie::update_tapped(Player *player) {
+void Zombie::update_tapper(Player *player) {
     if (this->get_hand(0)->is_dead() && has_respawn) {
         has_respawn = false;
         hands.push_back(new Hand(1, 4));
@@ -164,10 +174,10 @@ void Zombie::update_tapped(Player *player) {
 class Doggo : public Player {
    public:
     Doggo(int player_order) : Player(player_order, 'd', &DOGGO_INFO){};
-    void update_tapper(Player *tapper);
+    void update_tapper(Player *tapper, Appendage *source_appendage);
 };
 
-void Doggo::update_tapper(Player *tapper) {
+void Doggo::update_tapper(Player *tapper, Appendage *source_appendage) {
     tapper->set_turn(false);
 };
 
