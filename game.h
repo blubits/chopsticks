@@ -95,9 +95,9 @@ void Game::move(std::string command) {
             source_appendage = current_player->get_foot(source_appendage_idx);
         }
 
-        current_player->update_tapped(target_player);
         source_appendage->tap(target_appendage);
-        target_player->update_tapper(current_player);
+        current_player->update_tapped(target_player, target_appendage);
+        target_player->update_tapper(current_player, source_appendage);
 
     } else if (cmd == "disthands") {
         int x;
