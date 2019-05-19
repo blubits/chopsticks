@@ -27,7 +27,9 @@ Player *Team::get_player(int index) { return players[index]; }
 
 Player *Team::get_current_player() {
     Player *current_player = players[current_player_idx];
-    current_player_idx++;
+    if (!(current_player->has_actions())) {
+        current_player_idx++;
+    }
     if (current_player_idx == players.size()) {
         current_player_idx = 0;
     }
@@ -36,7 +38,9 @@ Player *Team::get_current_player() {
             break;
         }
         current_player = players[current_player_idx];
-        current_player_idx++;
+        if (!(current_player->has_actions())) {
+            current_player_idx++;
+        }
         if (current_player_idx == players.size()) {
             current_player_idx = 0;
         }
