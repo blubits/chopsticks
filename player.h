@@ -17,45 +17,56 @@
 class Player {
    protected:
     int player_team;
-    int player_order;
     char player_type;
     const PlayerInfo *player_info;
 
     std::vector<Hand *> hands;
     std::vector<Foot *> feet;
 
-    bool turn;
     int actions_remaining;
 
    public:
-    Player(int player_order, char player_type,
-           const PlayerInfo *player_info);
+    Player(char player_type, const PlayerInfo *player_info);
+
+    char get_player_type() const;
     Hand *get_hand(int i);
     Foot *get_foot(int i);
-    void distribute_hands(std::vector<int> input);
-    void distribute_feet(std::vector<int> input);
+    Appendage *get_appendage(string i);
+
     bool is_dead();
     bool has_turn();
-    void set_turn(bool t);
-    bool has_actions();
     void use_action();
+    void give_turn();
+    void skip_turn();
 
-    void update_tapper(Player *tapper, Appendage *source_appendage);
-    void update_tapped(Player *tapped, Appendage *target_appendage);
+    // Distributes digits to hands and/or feet.
+    void distribute_hands(std::vector<int> input);
+    void distribute_feet(std::vector<int> input);
 
-    // Abstract functions: override in subclasses
+    // Taps a player's appendage.
+    void tap(string my_appendage, Player *player, string target_appendage);
 
+    // Recieves a tap from a player's appendage. Returns a reference to this
+    // player's appendage that was tapped. Call after the tap has
+    // already proceeded.
+    virtual void Appendage *recieve_tap(Appendage *my_appendage, Player *tapper,
+                                        Appendage *source_appendage) = 0;
+
+    // Gives a tap to a player's appendage. Returns a reference to this
+    // player's appendage that tapped. Call after the tap has
+    // already proceeded.
+    virtual void Appendage *give_tap(Appendage *my_appendage, Player *tapped,
+                                     Appendage *target_appendage) = 0;
+
+    // Directs player state to an output stream.
     friend std::ostream &operator<<(std::ostream &os, const Player &dt);
-    std::string to_string();
 };
 
-Player::Player(int player_order, char player_type,
-               const PlayerInfo *player_info)
-    : player_order(player_order),
-      player_type(player_type),
+Player::Player(char player_type, const PlayerInfo *player_info)
+    : player_type(player_type),
       player_info(player_info),
       turn(true),
-      actions_remaining(player_info->num_actions) {
+      actions_remaining(0) {
     for (int i = 0; i < player_info->num_hands; i++) {
         hands.push_back(new Hand(1, player_info->num_fingers));
     }
@@ -64,23 +75,40 @@ Player::Player(int player_order, char player_type,
     }
 }
 
-void Player::update_tapper(Player *tapper, Appendage *source_appendage) {
-    ;
+char Player::get_player_type() const { return player_type; }
+
+Hand *Player::get_hand(int i) { return hands.get(i); }
+
+Foot *Player::get_foot(int i) { return feet.get(i); }
+
+Appendage *Player::get_appendage(string i) {
+    if (i.size() != 2) return nullptr;
+    int idx = i[1] - 'A';
+    if (i[0] == 'H') return get_hand(idx);
+    if (i[0] == 'F') return get_foot(idx);
+    return nullptr;
 }
 
-void Player::update_tapped(Player *tapped, Appendage *target_appendage) {
-    if (target_appendage->just_died() && target_appendage->get_type() == 'F') {
-        tapped->set_turn(false);
+bool Player::is_dead() {
+    for (auto &h : hands) {
+        if (!h->is_dead()) return false;
     }
+    for (auto &f : feet) {
+        if (!f->is_dead()) return false;
+    }
+    return true;
 }
 
-Hand *Player::get_hand(int i) {
-    return hands[i];
+bool Player::has_turn() { return actions_remaining != 0; }
+
+void Player::use_action() {
+    if (!has_turn()) return;
+    actions_remaining--;
 }
 
-Foot *Player::get_foot(int i) {
-    return feet[i];
-}
+void Player::give_turn() { actions_remaining = player_info->actions_per_turn; }
+
+void Player::skip_turn() { actions_remaining = 0; }
 
 void Player::distribute_hands(std::vector<int> input) {
     int i = 0;
@@ -96,14 +124,22 @@ void Player::distribute_feet(std::vector<int> input) {
     }
 }
 
-bool Player::is_dead() {
-    for (auto &h : hands) {
-        if (!h->is_dead()) return false;
-    }
-    for (auto &f : feet) {
-        if (!f->is_dead()) return false;
-    }
-    return true;
+void Player::tap(string my_appendage, Player *player, string target_appendage) {
+    Appendage *mine = get_appendage(my_appendage);
+    Appendage *theirs = player->get_appendage(target_appendage);
+
+    // if either of above returns nullptr, the appendage DNE
+    if (mine == nullptr || theirs == nullptr) return;
+
+    // if either of the above are already dead, tapping cannot proceed
+    if (mine->is_dead() || theirs->is_dead()) return;
+
+    // proceed with tapping
+    theirs->add_digits(mine->get_digits_raised());
+
+    // call tap recievers to prepare for the tap
+    Appendage *new_mine = give_tap(mine, player, theirs);
+    Appendage *new_theirs = player->recieve_tap(theirs, this, mine);
 }
 
 std::ostream &operator<<(std::ostream &os, const Player &dt) {
@@ -115,72 +151,106 @@ std::ostream &operator<<(std::ostream &os, const Player &dt) {
     return os;
 }
 
-bool Player::has_turn() {
-    return turn;
-}
-
-void Player::set_turn(bool t) {
-    turn = t;
-}
-
-bool Player::has_actions() {
-    return actions_remaining != 0;
-}
-
-void Player::use_action() {
-    if (!has_turn()) return;
-    actions_remaining--;
-    if (actions_remaining == 0) {
-        actions_remaining = player_info->num_actions;
-    }
-}
-
+// A human player.
+//
+// No special attributes are assigned to this player.
 class Human : public Player {
    public:
     Human(int player_order);
+    void Appendage *recieve_tap(Appendage *my_appendage, Player *tapper,
+                                Appendage *source_appendage) override;
+    void Appendage *give_tap(Appendage *my_appendage, Player *tapped,
+                             Appendage *target_appendage) override;
 };
 
-Human::Human(int player_order) : Player(player_order, 'h', &HUMAN_INFO){};
+Human::Human() : Player('h', &HUMAN_INFO) {}
 
-class Alien : public Player {
-   public:
-    Alien(int player_order) : Player(player_order, 'a', &ALIEN_INFO){};
-    void update_tapper(Player *player, Appendage *source_appendage);
-};
-
-void Alien::update_tapper(Player *player, Appendage *source_appendage) {
-    if (is_dead()) {
-        return;
+void Appendage *Human::recieve_tap(Appendage *my_appendage, Player *tapper,
+                                   Appendage *source_appendage) {
+    // skip my turn if my foot died
+    if (my_appendage->get_appendage_type() == 'F' && my_appendage->is_dead()) {
+        skip_turn();
     }
-    this->turn = true;
+    return my_appendage;
+}
+void Appendage *Human::give_tap(Appendage *my_appendage, Player *tapped,
+                                Appendage *target_appendage) {
+    return my_appendage;
 }
 
+// An alien player.
+//
+// The alien does not skip a turn if their foot died.
+class Alien : public Player {
+   public:
+    Alien(int player_order);
+    void recieve_tap(Player *tapper, Appendage *source_appendage) override;
+    void give_tap(Player *tapped, Appendage *target_appendage) override;
+};
+
+Alien::Alien() : Player('a', &ALIEN_INFO) {}
+
+void Appendage *Alien::recieve_tap(Appendage *my_appendage, Player *tapper,
+                                   Appendage *source_appendage) {
+    return my_appendage;
+}
+void Appendage *Alien::give_tap(Appendage *my_appendage, Player *tapped,
+                                Appendage *target_appendage) {
+    return my_appendage;
+}
+
+// A zombie player.
+//
+// The zombie respawns a hand if their first hand died.
 class Zombie : public Player {
    private:
     bool has_respawn = true;
 
    public:
-    Zombie(int player_order) : Player(player_order, 'z', &ZOMBIE_INFO){};
-    void update_tapper(Player *player);
+    Zombie();
+    void recieve_tap(Player *tapper, Appendage *source_appendage) override;
+    void give_tap(Player *tapped, Appendage *target_appendage) override;
 };
 
-void Zombie::update_tapper(Player *player) {
-    if (this->get_hand(0)->is_dead() && has_respawn) {
-        has_respawn = false;
-        hands.push_back(new Hand(1, 4));
+Zombie::Zombie() : Player('z', &ZOMBIE_INFO) {}
+
+void Appendage *Zombie::recieve_tap(Appendage *my_appendage, Player *tapper,
+                                    Appendage *source_appendage) {
+    if (my_appendage->is_dead() && has_respawn) {
+        hands.push_back(new Hand(1, player_info->num_fingers));
     }
+    return my_appendage;
+}
+void Appendage *Zombie::give_tap(Appendage *my_appendage, Player *tapped,
+                                 Appendage *target_appendage) {
+    return my_appendage;
 }
 
+// A doggo player.
+//
+// Any non-doggo who taps a doggo skips his turn.
 class Doggo : public Player {
    public:
-    Doggo(int player_order) : Player(player_order, 'd', &DOGGO_INFO){};
-    void update_tapper(Player *tapper, Appendage *source_appendage);
+    Doggo();
+    void recieve_tap(Player *tapper, Appendage *source_appendage) override;
+    void give_tap(Player *tapped, Appendage *target_appendage) override;
 };
 
-void Doggo::update_tapper(Player *tapper, Appendage *source_appendage) {
-    tapper->set_turn(false);
-};
+Doggo::Doggo() : Player('d', &DOGGO_INFO) {}
 
+void Appendage *Doggo::recieve_tap(Appendage *my_appendage, Player *tapper,
+                                   Appendage *source_appendage) {
+    if (player->get_player_type() != 'd') {
+        player->skip_turn();
+    }
+    return my_appendage;
+}
+void Appendage *Doggo::give_tap(Appendage *my_appendage, Player *tapped,
+                                Appendage *target_appendage) {
+    return my_appendage;
+}
+
+// A factory for Player objects.
 class PlayerFactory {
    public:
     static Player *make_player(int player_order, std::string player_type);
