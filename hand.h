@@ -21,16 +21,19 @@ class Appendage {
     int raised;
     int max;
     bool died;
+    char type;
 
    public:
     Appendage();
     Appendage(int raised, int max);
+    Appendage(int raised, int max, char type);
     int get_raised() const;
     int get_max() const;
     void set_raised(int digits);
     std::string to_string();
     void tap(Appendage* tap_target);
     bool just_died();
+    char get_type();
 
     // Add additional raised digits to the appendage. Can only
     // be done as long as the appendage is still alive.
@@ -46,6 +49,8 @@ class Appendage {
 Appendage::Appendage() : raised(1), max(5){};
 
 Appendage::Appendage(int raised, int max) : raised(raised), max(max), died(false){};
+
+Appendage::Appendage(int raised, int max, char type) : raised(raised), max(max), died(false), type(type){};
 
 void Appendage::tap(Appendage* tap_target) {
     if (tap_target->is_dead()) {
@@ -72,6 +77,10 @@ void Appendage::set_raised(int digits) {
     raised = digits;
 }
 
+char Appendage::get_type() {
+    return type;
+}
+
 std::ostream& operator<<(std::ostream& os, const Appendage& dt) {
     if (dt.is_dead()) {
         os << "X";
@@ -86,7 +95,7 @@ std::ostream& operator<<(std::ostream& os, const Appendage& dt) {
 // wrap around, and the hand remains alive until all fingers are raised.
 class Hand : public Appendage {
    public:
-    using Appendage::Appendage;
+    Hand(int raised, int max) : Appendage(raised, max, 'H'){};
     void add_digits(int digits) override;
     bool is_dead() const override;
 };
@@ -104,7 +113,7 @@ bool Hand::is_dead() const { return raised == max; }
 // a turn if one of his feet dies.
 class Foot : public Appendage {
    public:
-    using Appendage::Appendage;
+    Foot(int raised, int max) : Appendage(raised, max, 'F'){};
     void add_digits(int digits) override;
     bool is_dead() const override;
 };
