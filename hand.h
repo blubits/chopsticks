@@ -20,6 +20,7 @@ class Appendage {
    protected:
     int raised;
     int max;
+    bool died;
 
    public:
     Appendage();
@@ -29,6 +30,7 @@ class Appendage {
     void set_raised(int digits);
     std::string to_string();
     void tap(Appendage* tap_target);
+    bool just_died();
 
     // Add additional raised digits to the appendage. Can only
     // be done as long as the appendage is still alive.
@@ -43,13 +45,22 @@ class Appendage {
 
 Appendage::Appendage() : raised(1), max(5){};
 
-Appendage::Appendage(int raised, int max) : raised(raised), max(max){};
+Appendage::Appendage(int raised, int max) : raised(raised), max(max), died(false){};
 
 void Appendage::tap(Appendage* tap_target) {
     if (tap_target->is_dead()) {
         return;
     }
     tap_target->add_digits(this->raised);
+    if (tap_target->is_dead()) {
+        tap_target->died = true;
+    }
+}
+
+bool Appendage::just_died() {
+    bool res = died;
+    died = false;
+    return res;
 }
 
 int Appendage::get_max() const { return max; }
