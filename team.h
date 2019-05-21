@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sstream>
+#include "debug.h"
 #include "player.h"
 
 class Team {
@@ -18,9 +19,10 @@ class Team {
     void add_player(Player *player);
     bool is_dead();
     bool is_skipped();
+    void clear_skips();
 
     Player *get_current_player();
-    bool go_to_next_player();
+    void go_to_next_player();
 
     // Directs team state to an output stream.
     friend std::ostream &operator<<(std::ostream &os, const Team &dt);
@@ -47,7 +49,7 @@ bool Team::is_dead() {
 
 bool Team::is_skipped() {
     for (auto i : players) {
-        if (!i->turn_skipped()) return false;
+        if (!(i->turn_skipped())) return false;
     }
     return true;
 }
@@ -57,24 +59,42 @@ Player *Team::get_current_player() {
     return players.at(current_player_idx);
 }
 
-bool Team::go_to_next_player() {
-    if (is_dead()) return false;
-    for (int di = 1; di < size(); di++) {
+void Team::clear_skips() {
+    bool return_game_play = false;
+    if (is_skipped()) return_game_play = true;
+    for (int i = 0; i < size(); i++) {
+        get_player(i)->unskip_turn();
+        if (return_game_play && i == current_player_idx)
+            get_player(i)->give_turn();
+        // if (return_game_play && i == 0) get_player(i)->give_turn();
+    }
+}
+
+void Team::go_to_next_player() {
+    if (is_dead() || get_current_player()->has_turn()) return;
+    if (DEBUG) std::cout << "Finding next player... " << std::endl;
+    for (int _ = 1; _ <= size(); _++) {
         current_player_idx = (current_player_idx + 1) % size();
         Player *possible_player = get_player(current_player_idx);
-        if (possible_player->is_dead()) continue;
+        if (possible_player->is_dead()) {
+            if (DEBUG)
+                std::cout << *possible_player << " is dead ("
+                          << current_player_idx << ")" << std::endl;
+            continue;
+        }
         if (possible_player->turn_skipped()) {
+            if (DEBUG)
+                std::cout << *possible_player << "'s turn is skipped ("
+                          << current_player_idx << ")" << std::endl;
             possible_player->unskip_turn();
             continue;
         }
         possible_player->give_turn();
-        return true;
+        if (DEBUG)
+            std::cout << "It's " << *possible_player << "'s turn ("
+                      << current_player_idx << ")" << std::endl;
+        break;
     }
-    current_player_idx = (current_player_idx + 1) % size();
-    if (get_current_player()->turn_skipped()) {
-        get_current_player()->unskip_turn();
-    }
-    return false;
 }
 
 std::ostream &operator<<(std::ostream &os, const Team &dt) {

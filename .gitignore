@@ -6,6 +6,7 @@ chopsticks
 error
 main
 merge.py
+main.cpp
 
 # Prerequisites
 *.d

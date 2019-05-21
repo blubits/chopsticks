@@ -30,7 +30,9 @@ int main() {
 
     string command;
     while (getline(cin, command)) {
+        if (DEBUG) cout << command << endl;
         g.move(command);
+        if (DEBUG) cout << "After this move: " << endl;
         cout << g << endl;
         if (!g.is_ongoing()) {
             cout << "Team " << g.who_won() + 1 << " wins!" << endl;

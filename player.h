@@ -10,6 +10,7 @@
 #include <ostream>
 #include <string>
 #include <vector>
+#include "debug.h"
 #include "hand.h"
 #include "playerinfo.h"
 
@@ -103,7 +104,7 @@ bool Player::is_dead() {
     return true;
 }
 
-bool Player::has_turn() { return actions_remaining != 0; }
+bool Player::has_turn() { return actions_remaining > 0; }
 
 bool Player::turn_skipped() { return actions_remaining == -1; }
 
@@ -112,11 +113,16 @@ void Player::use_action() {
     actions_remaining--;
 }
 
-void Player::give_turn() { actions_remaining = player_info->actions_per_turn; }
+void Player::give_turn() {
+    if (turn_skipped()) return;
+    actions_remaining = player_info->actions_per_turn;
+}
 
 void Player::skip_turn() { actions_remaining = -1; }
 
-void Player::unskip_turn() { actions_remaining = 0; }
+void Player::unskip_turn() {
+    if (turn_skipped()) actions_remaining = 0;
+}
 
 void Player::distribute_hands(std::vector<int> input) {
     int i = 0;
@@ -137,10 +143,11 @@ void Player::tap(std::string my_appendage, Player *player,
     Appendage *mine = get_appendage(my_appendage);
     Appendage *theirs = player->get_appendage(target_appendage);
 
-    // std::cout << *player << " (" << *theirs << ":"
-    //           << theirs->get_appendage_type() << ") is getting tapped by "
-    //           << *this << " (" << *mine << ":" << mine->get_appendage_type()
-    //           << ")" << std::endl;
+    if (DEBUG)
+        std::cout << *player << " (" << *theirs << ":"
+                  << theirs->get_appendage_type() << ") is getting tapped by "
+                  << *this << " (" << *mine << ":" << mine->get_appendage_type()
+                  << ")" << std::endl;
 
     // if either of above returns nullptr, the appendage DNE
     if (mine == nullptr || theirs == nullptr) return;
@@ -158,15 +165,11 @@ void Player::tap(std::string my_appendage, Player *player,
 
 std::ostream &operator<<(std::ostream &os, Player &dt) {
     os << "P" << dt.player_order << dt.player_type;
-    // os << " [";
-    // if (dt.has_turn()) {
-    //     os << "!";
-    // } else if (dt.turn_skipped()) {
-    //     os << "X";
-    // } else {
-    //     os << ".";
-    // }
-    // os << "]";
+    if (DEBUG) {
+        os << " [";
+        os << dt.actions_remaining;
+        os << "]";
+    }
     os << " (";
     for (auto &h : dt.hands) os << (*h);
     os << ":";
@@ -193,6 +196,7 @@ Appendage *Human::recieve_tap(Appendage *my_appendage, Player *tapper,
                               Appendage *source_appendage) {
     // skip my turn if my foot died
     if (my_appendage->get_appendage_type() == 'F' && my_appendage->is_dead()) {
+        if (DEBUG) std::cout << "I have gangrene" << std::endl;
         skip_turn();
     }
     return my_appendage;

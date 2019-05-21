@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "debug.h"
 #include "team.h"
 
 class Game {
@@ -29,6 +30,7 @@ class Game {
     void push_team();
 
     void start_game();
+    Team *get_current_team();
     Player *get_current_player();
     void go_to_next_player();
 
@@ -62,23 +64,42 @@ void Game::push_player(int player_team, std::string player_type) {
 
 void Game::push_team() { teams.push_back(new Team()); };
 
-void Game::start_game() { get_current_player()->give_turn(); }
-
-Player *Game::get_current_player() {
-    return get_team(current_team_idx)->get_current_player();
+void Game::start_game() {
+    for (auto t : teams) {
+        t->get_player(0)->give_turn();
+    }
 }
 
+Player *Game::get_current_player() {
+    if (get_current_team()->get_current_player()->turn_skipped()) {
+        if (DEBUG) std::cout << "here" << std::endl;
+        get_current_team()->get_current_player()->unskip_turn();
+        get_current_team()->go_to_next_player();
+    }
+    return get_current_team()->get_current_player();
+}
+
+Team *Game::get_current_team() { return get_team(current_team_idx); }
+
 void Game::go_to_next_player() {
-    get_team(current_team_idx)->go_to_next_player();
+    if (get_current_player()->has_turn()) return;
+    get_current_team()->go_to_next_player();
+    get_current_team()->clear_skips();
     for (int dt = 1; dt <= num_teams(); dt++) {
+        if (DEBUG) std::cout << "Finding next team.." << std::endl;
         current_team_idx = (current_team_idx + 1) % num_teams();
-        Team *possible_team = get_team(current_team_idx);
+        Team *possible_team = get_current_team();
         if (possible_team->is_skipped()) {
+            if (DEBUG)
+                std::cout << "Skipping team " << current_team_idx + 1
+                          << std::endl;
+            possible_team->clear_skips();
             possible_team->go_to_next_player();
             continue;
         }
         if (possible_team->get_current_player() != nullptr) {
-            possible_team->get_current_player()->give_turn();
+            if (DEBUG)
+                std::cout << "Found team " << current_team_idx + 1 << std::endl;
             break;
         }
     }
@@ -86,6 +107,7 @@ void Game::go_to_next_player() {
 
 void Game::move(std::string command) {
     Player *current_player = get_current_player();
+    if (DEBUG) std::cout << *current_player << std::endl;
     if (current_player == nullptr || !is_ongoing()) return;
 
     std::stringstream ss(command);
@@ -140,7 +162,7 @@ void Game::check_win_condition() {
 
 std::ostream &operator<<(std::ostream &os, Game &dt) {
     for (int i = 0; i < dt.num_teams(); i++) {
-        // if (dt.current_team_idx == i) os << "> ";
+        if (DEBUG && dt.current_team_idx == i) os << "> ";
         os << "Team " << i + 1 << ": " << *(dt.get_team(i)) << std::endl;
     }
     return os;

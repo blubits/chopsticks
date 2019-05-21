@@ -2,6 +2,9 @@
 
 #include <bits/stdc++.h>
 
+// disables all debug code
+const int DEBUG = false;
+
 /***
  * hand.h
  */
@@ -11,8 +14,6 @@
 //
 // @author Maded Batara III (blubits)
 // @date 2019-05-16
-
-
 
 // Represents the appendages of a certain player.
 //
@@ -34,7 +35,7 @@ class Appendage {
     int get_digits_raised() const;
     void set_digits_raised(int digits);
     int get_digits_max() const;
-    void tap(Appendage* tap_target);
+    void tap(Appendage *tap_target);
 
     // Add additional digits_raised digits to the appendage. Can only
     // be done as long as the appendage is still alive.
@@ -44,7 +45,7 @@ class Appendage {
     virtual bool is_dead() const = 0;
 
     // Directs appendage state to an output stream.
-    friend std::ostream& operator<<(std::ostream& os, const Appendage& dt);
+    friend std::ostream &operator<<(std::ostream &os, const Appendage &dt);
 };
 
 Appendage::Appendage() : digits_raised(1), digits_max(5), appendage_type('A') {}
@@ -59,7 +60,7 @@ Appendage::Appendage(int digits_raised, int digits_max, char appendage_type)
       digits_max(digits_max),
       appendage_type(appendage_type) {}
 
-void Appendage::tap(Appendage* tap_target) {
+void Appendage::tap(Appendage *tap_target) {
     if (tap_target->is_dead()) return;
     tap_target->add_digits(digits_raised);
 }
@@ -75,7 +76,7 @@ void Appendage::set_digits_raised(int digits) {
     digits_raised = digits;
 }
 
-std::ostream& operator<<(std::ostream& os, const Appendage& dt) {
+std::ostream &operator<<(std::ostream &os, const Appendage &dt) {
     if (dt.is_dead()) {
         os << "X";
     } else {
@@ -129,15 +130,12 @@ void Foot::add_digits(int digits) {
 
 bool Foot::is_dead() const { return digits_raised >= digits_max; }
 
-
-
 /***
  * playerinfo.h
  */
 
 // @author Maded Batara III (blubits)
 // @date 2019-05-16
-
 
 // Info on a player's appendages.
 struct PlayerInfo {
@@ -163,8 +161,6 @@ const PlayerInfo ALIEN_INFO(4, 2, 3, 2, 1);
 const PlayerInfo ZOMBIE_INFO(1, 0, 4, 0, 2);
 const PlayerInfo DOGGO_INFO(0, 4, 0, 4, 1);
 
-
-
 /***
  * player.h
  */
@@ -174,8 +170,6 @@ const PlayerInfo DOGGO_INFO(0, 4, 0, 4, 1);
 //
 // @author Maded Batara III (blubits)
 // @date 2019-05-16
-
-
 
 // Represents a game player.
 class Player {
@@ -267,7 +261,7 @@ bool Player::is_dead() {
     return true;
 }
 
-bool Player::has_turn() { return actions_remaining != 0; }
+bool Player::has_turn() { return actions_remaining > 0; }
 
 bool Player::turn_skipped() { return actions_remaining == -1; }
 
@@ -276,11 +270,16 @@ void Player::use_action() {
     actions_remaining--;
 }
 
-void Player::give_turn() { actions_remaining = player_info->actions_per_turn; }
+void Player::give_turn() {
+    if (turn_skipped()) return;
+    actions_remaining = player_info->actions_per_turn;
+}
 
 void Player::skip_turn() { actions_remaining = -1; }
 
-void Player::unskip_turn() { actions_remaining = 0; }
+void Player::unskip_turn() {
+    if (turn_skipped()) actions_remaining = 0;
+}
 
 void Player::distribute_hands(std::vector<int> input) {
     int i = 0;
@@ -301,10 +300,11 @@ void Player::tap(std::string my_appendage, Player *player,
     Appendage *mine = get_appendage(my_appendage);
     Appendage *theirs = player->get_appendage(target_appendage);
 
-    // std::cout << *player << " (" << *theirs << ":"
-    //           << theirs->get_appendage_type() << ") is getting tapped by "
-    //           << *this << " (" << *mine << ":" << mine->get_appendage_type()
-    //           << ")" << std::endl;
+    if (DEBUG)
+        std::cout << *player << " (" << *theirs << ":"
+                  << theirs->get_appendage_type() << ") is getting tapped by "
+                  << *this << " (" << *mine << ":" << mine->get_appendage_type()
+                  << ")" << std::endl;
 
     // if either of above returns nullptr, the appendage DNE
     if (mine == nullptr || theirs == nullptr) return;
@@ -322,15 +322,11 @@ void Player::tap(std::string my_appendage, Player *player,
 
 std::ostream &operator<<(std::ostream &os, Player &dt) {
     os << "P" << dt.player_order << dt.player_type;
-    // os << " [";
-    // if (dt.has_turn()) {
-    //     os << "!";
-    // } else if (dt.turn_skipped()) {
-    //     os << "X";
-    // } else {
-    //     os << ".";
-    // }
-    // os << "]";
+    if (DEBUG) {
+        os << " [";
+        os << dt.actions_remaining;
+        os << "]";
+    }
     os << " (";
     for (auto &h : dt.hands) os << (*h);
     os << ":";
@@ -357,6 +353,7 @@ Appendage *Human::recieve_tap(Appendage *my_appendage, Player *tapper,
                               Appendage *source_appendage) {
     // skip my turn if my foot died
     if (my_appendage->get_appendage_type() == 'F' && my_appendage->is_dead()) {
+        if (DEBUG) std::cout << "I have gangrene" << std::endl;
         skip_turn();
     }
     return my_appendage;
@@ -463,13 +460,9 @@ Player *PlayerFactory::make_player(int player_order, std::string player_type) {
     return nullptr;
 };
 
-
-
 /***
  * team.h
  */
-
-
 
 class Team {
    private:
@@ -484,9 +477,10 @@ class Team {
     void add_player(Player *player);
     bool is_dead();
     bool is_skipped();
+    void clear_skips();
 
     Player *get_current_player();
-    bool go_to_next_player();
+    void go_to_next_player();
 
     // Directs team state to an output stream.
     friend std::ostream &operator<<(std::ostream &os, const Team &dt);
@@ -513,7 +507,7 @@ bool Team::is_dead() {
 
 bool Team::is_skipped() {
     for (auto i : players) {
-        if (!i->turn_skipped()) return false;
+        if (!(i->turn_skipped())) return false;
     }
     return true;
 }
@@ -523,24 +517,42 @@ Player *Team::get_current_player() {
     return players.at(current_player_idx);
 }
 
-bool Team::go_to_next_player() {
-    if (is_dead()) return false;
-    for (int di = 1; di < size(); di++) {
+void Team::clear_skips() {
+    bool return_game_play = false;
+    if (is_skipped()) return_game_play = true;
+    for (int i = 0; i < size(); i++) {
+        get_player(i)->unskip_turn();
+        if (return_game_play && i == current_player_idx)
+            get_player(i)->give_turn();
+        // if (return_game_play && i == 0) get_player(i)->give_turn();
+    }
+}
+
+void Team::go_to_next_player() {
+    if (is_dead() || get_current_player()->has_turn()) return;
+    if (DEBUG) std::cout << "Finding next player... " << std::endl;
+    for (int _ = 1; _ <= size(); _++) {
         current_player_idx = (current_player_idx + 1) % size();
         Player *possible_player = get_player(current_player_idx);
-        if (possible_player->is_dead()) continue;
+        if (possible_player->is_dead()) {
+            if (DEBUG)
+                std::cout << *possible_player << " is dead ("
+                          << current_player_idx << ")" << std::endl;
+            continue;
+        }
         if (possible_player->turn_skipped()) {
+            if (DEBUG)
+                std::cout << *possible_player << "'s turn is skipped ("
+                          << current_player_idx << ")" << std::endl;
             possible_player->unskip_turn();
             continue;
         }
         possible_player->give_turn();
-        return true;
+        if (DEBUG)
+            std::cout << "It's " << *possible_player << "'s turn ("
+                      << current_player_idx << ")" << std::endl;
+        break;
     }
-    current_player_idx = (current_player_idx + 1) % size();
-    if (get_current_player()->turn_skipped()) {
-        get_current_player()->unskip_turn();
-    }
-    return false;
 }
 
 std::ostream &operator<<(std::ostream &os, const Team &dt) {
@@ -553,13 +565,9 @@ std::ostream &operator<<(std::ostream &os, const Team &dt) {
     return os;
 }
 
-
-
 /***
  * game.h
  */
-
-
 
 class Game {
    private:
@@ -583,6 +591,7 @@ class Game {
     void push_team();
 
     void start_game();
+    Team *get_current_team();
     Player *get_current_player();
     void go_to_next_player();
 
@@ -616,23 +625,42 @@ void Game::push_player(int player_team, std::string player_type) {
 
 void Game::push_team() { teams.push_back(new Team()); };
 
-void Game::start_game() { get_current_player()->give_turn(); }
-
-Player *Game::get_current_player() {
-    return get_team(current_team_idx)->get_current_player();
+void Game::start_game() {
+    for (auto t : teams) {
+        t->get_player(0)->give_turn();
+    }
 }
 
+Player *Game::get_current_player() {
+    if (get_current_team()->get_current_player()->turn_skipped()) {
+        if (DEBUG) std::cout << "here" << std::endl;
+        get_current_team()->get_current_player()->unskip_turn();
+        get_current_team()->go_to_next_player();
+    }
+    return get_current_team()->get_current_player();
+}
+
+Team *Game::get_current_team() { return get_team(current_team_idx); }
+
 void Game::go_to_next_player() {
-    get_team(current_team_idx)->go_to_next_player();
+    if (get_current_player()->has_turn()) return;
+    get_current_team()->go_to_next_player();
+    get_current_team()->clear_skips();
     for (int dt = 1; dt <= num_teams(); dt++) {
+        if (DEBUG) std::cout << "Finding next team.." << std::endl;
         current_team_idx = (current_team_idx + 1) % num_teams();
-        Team *possible_team = get_team(current_team_idx);
+        Team *possible_team = get_current_team();
         if (possible_team->is_skipped()) {
+            if (DEBUG)
+                std::cout << "Skipping team " << current_team_idx + 1
+                          << std::endl;
+            possible_team->clear_skips();
             possible_team->go_to_next_player();
             continue;
         }
         if (possible_team->get_current_player() != nullptr) {
-            possible_team->get_current_player()->give_turn();
+            if (DEBUG)
+                std::cout << "Found team " << current_team_idx + 1 << std::endl;
             break;
         }
     }
@@ -640,6 +668,7 @@ void Game::go_to_next_player() {
 
 void Game::move(std::string command) {
     Player *current_player = get_current_player();
+    if (DEBUG) std::cout << *current_player << std::endl;
     if (current_player == nullptr || !is_ongoing()) return;
 
     std::stringstream ss(command);
@@ -694,20 +723,17 @@ void Game::check_win_condition() {
 
 std::ostream &operator<<(std::ostream &os, Game &dt) {
     for (int i = 0; i < dt.num_teams(); i++) {
-        // if (dt.current_team_idx == i) os << "> ";
+        if (DEBUG && dt.current_team_idx == i) os << "> ";
         os << "Team " << i + 1 << ": " << *(dt.get_team(i)) << std::endl;
     }
     return os;
 }
-
-
 
 /***
  * chopsticks.cpp
  */
 
 // CS12 S - Batara, Salinas
-
 
 using namespace std;
 
@@ -734,7 +760,9 @@ int main() {
 
     string command;
     while (getline(cin, command)) {
+        if (DEBUG) cout << command << endl;
         g.move(command);
+        if (DEBUG) cout << "After this move: " << endl;
         cout << g << endl;
         if (!g.is_ongoing()) {
             cout << "Team " << g.who_won() + 1 << " wins!" << endl;
@@ -742,5 +770,3 @@ int main() {
         }
     }
 }
-
-
