@@ -19,6 +19,7 @@ class Team {
     void add_player(Player *player);
     bool is_dead();
     bool is_skipped();
+    bool can_play();
     void clear_skips();
 
     Player *get_current_player();
@@ -49,9 +50,20 @@ bool Team::is_dead() {
 
 bool Team::is_skipped() {
     for (auto i : players) {
-        if (!(i->turn_skipped())) return false;
+        if (!(i->turn_skipped())) {
+            return false;
+        }
     }
     return true;
+}
+
+bool Team::can_play() {
+    for (auto i : players) {
+        if (!(i->is_dead()) && !(i->turn_skipped())) {
+            return true;
+        }
+    }
+    return false;
 }
 
 Player *Team::get_current_player() {

@@ -97,12 +97,13 @@ Player *Game::get_current_player() {
 
 Team *Game::get_current_team() {
     Team *current_team = get_team(current_team_idx);
-    if (current_team->is_skipped() || current_team->is_dead()) {
+    if (!(current_team->can_play()) || current_team->is_skipped() || current_team->is_dead()) {
         if (DEBUG && current_team->is_skipped()) {
             std::cout << "GAME:get_current_team() Current team is skipped. Finding new team." << std::endl;
-        }
-        if (DEBUG && current_team->is_dead()) {
+        } else if (DEBUG && current_team->is_dead()) {
             std::cout << "GAME:get_current_team() Current team is dead. Finding new team." << std::endl;
+        } else if (!(current_team->can_play())) {
+            std::cout << "GAME:get_current_team() Current team cannot play. Finding new team." << std::endl;
         }
         go_to_next_team();
         current_team = get_team(current_team_idx);
@@ -118,18 +119,19 @@ Team *Game::get_current_team() {
 void Game::go_to_next_team() {
     current_team_idx = (current_team_idx + 1) % num_teams();
     Team *current_team = get_team(current_team_idx);
-    while (current_team->is_skipped() || current_team->is_dead()) {
+    while (!(current_team->can_play()) || current_team->is_skipped() || current_team->is_dead()) {
         // DEBUG CODE
         if (DEBUG && current_team->is_skipped()) {
             std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1 << " is skipped. Looking for new team." << std::endl;
-        }
-        if (DEBUG && current_team->is_dead()) {
+        } else if (DEBUG && current_team->is_dead()) {
             std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1 << " is dead. Looking for new team." << std::endl;
-        }
-        if (current_team->is_skipped()) {
-            current_team->clear_skips();
+        } else if (DEBUG && !(current_team->can_play())) {
+            std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1 << " cannot play. Looking for new team." << std::endl;
         }
         // END DEBUG CODE
+        if (current_team->is_skipped() || !(current_team->can_play())) {
+            current_team->clear_skips();
+        }
         current_team_idx = (current_team_idx + 1) % num_teams();
         current_team = get_team(current_team_idx);
     }
@@ -141,8 +143,9 @@ void Game::go_to_next_team() {
 }
 
 void Game::go_to_next_player() {
-    get_current_team()->go_to_next_player();
-    get_current_team()->clear_skips();
+    Team *current_team = get_current_team();
+    current_team->go_to_next_player();
+    current_team->clear_skips();
     go_to_next_team();
 }
 
