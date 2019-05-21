@@ -28,11 +28,15 @@ int main() {
     g.start_game();
     cout << g << endl;
 
+    int i = 1;
     string command;
     while (getline(cin, command)) {
-        if (DEBUG) cout << command << endl;
+        if (DEBUG) {
+            cout << "MAIN:main() Turn #" << i << " | " << command << endl;
+            i++;
+        }
+
         g.move(command);
-        if (DEBUG) cout << "After this move: " << endl;
         cout << g << endl;
         if (!g.is_ongoing()) {
             cout << "Team " << g.who_won() + 1 << " wins!" << endl;
