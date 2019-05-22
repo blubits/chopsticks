@@ -24,6 +24,7 @@ class Player {
     std::vector<Hand *> hands;
     std::vector<Foot *> feet;
 
+    bool is_skipped;
     int actions_remaining;
 
    public:
@@ -37,6 +38,8 @@ class Player {
     bool is_dead();
     bool has_turn();
     bool turn_skipped();
+    bool has_action();
+    void reset_actions();
     void use_action();
     void give_turn();
     void skip_turn();
@@ -71,7 +74,8 @@ Player::Player(int player_order, char player_type,
     : player_order(player_order),
       player_type(player_type),
       player_info(player_info),
-      actions_remaining(0) {
+      actions_remaining(0),
+      is_skipped(false) {
     for (int i = 0; i < player_info->num_hands; i++) {
         hands.push_back(new Hand(1, player_info->num_fingers));
     }
@@ -107,7 +111,7 @@ bool Player::is_dead() {
 bool Player::has_turn() { return actions_remaining > 0; }
 
 bool Player::turn_skipped() {
-    return actions_remaining == -1;
+    return is_skipped;
 }
 
 void Player::use_action() {
@@ -115,15 +119,26 @@ void Player::use_action() {
     actions_remaining--;
 }
 
+void Player::reset_actions() {
+    actions_remaining = player_info->actions_per_turn;
+}
+
+bool Player::has_action() {
+    return actions_remaining > 0;
+}
+
 void Player::give_turn() {
     if (turn_skipped()) return;
     actions_remaining = player_info->actions_per_turn;
 }
 
-void Player::skip_turn() { actions_remaining = -1; }
+void Player::skip_turn() { is_skipped = true; }
 
 void Player::unskip_turn() {
-    if (turn_skipped()) actions_remaining = 0;
+    if (turn_skipped()) {
+        is_skipped = false;
+        actions_remaining = 0;
+    }
 }
 
 void Player::distribute_hands(std::vector<int> input) {
