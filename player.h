@@ -41,6 +41,7 @@ class Player {
     bool has_action();
     void reset_actions();
     void use_action();
+    bool in_play();
     void give_turn();
     void skip_turn();
     void unskip_turn();
@@ -108,14 +109,13 @@ bool Player::is_dead() {
     return true;
 }
 
-bool Player::has_turn() { return actions_remaining > 0; }
+bool Player::has_turn() { return !is_skipped; }
 
 bool Player::turn_skipped() {
     return is_skipped;
 }
 
 void Player::use_action() {
-    if (!has_turn()) return;
     actions_remaining--;
 }
 
@@ -130,6 +130,10 @@ bool Player::has_action() {
 void Player::give_turn() {
     if (turn_skipped()) return;
     actions_remaining = player_info->actions_per_turn;
+}
+
+bool Player::in_play() {
+    return actions_remaining != player_info->actions_per_turn;
 }
 
 void Player::skip_turn() { is_skipped = true; }
@@ -183,6 +187,9 @@ std::ostream &operator<<(std::ostream &os, Player &dt) {
     if (DEBUG) {
         os << " [";
         os << dt.actions_remaining;
+        os << "]";
+        os << "[";
+        os << !dt.is_skipped;
         os << "]";
     }
     os << " (";
@@ -293,7 +300,7 @@ Appendage *Doggo::recieve_tap(Appendage *my_appendage, Player *tapper,
                               Appendage *source_appendage) {
     if (tapper->get_player_type() != 'd') {
         if (DEBUG) {
-            std::cout << "PLAYER:receive_tap() Tapped a doggo. Skipping next turn." << std::endl;
+            std::cout << "PLAYER:receive_tap() Tapped a giant donggo. Skipping next turn." << std::endl;
         }
         tapper->skip_turn();
     }

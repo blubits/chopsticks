@@ -96,12 +96,12 @@ void Team::clear_skips() {
 }
 
 void Team::go_to_next_player() {
-    if (is_dead() || get_current_player()->has_turn()) {
+    if (is_dead() || get_current_player()->has_action()) {
         // DEBUG CODE
         if (DEBUG && is_dead()) {
             std::cout << "TEAM:go_to_next_player() Team is dead, cannot change players." << std::endl;
         } else if (DEBUG) {
-            std::cout << "TEAM:go_to_next_player() Current player still has turn, cannot change players" << std::endl;
+            std::cout << "TEAM:go_to_next_player() Current player still has actions, cannot change players" << std::endl;
         }
         // END DEBUG CODE
         return;
@@ -133,7 +133,7 @@ void Team::go_to_next_player() {
             // END DEBUG CODE
             continue;
         }
-        if (possible_player->turn_skipped()) {
+        if (possible_player->turn_skipped() && !possible_player->in_play()) {
             // DEBUG CODE
             if (DEBUG) {
                 std::cout << "TEAM:go_to_next_player() Player " << *possible_player << " has turn skipped. Resetting and iterating." << std::endl;

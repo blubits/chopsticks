@@ -75,8 +75,17 @@ void Game::start_game() {
 Player *Game::get_current_player() {
     Team *current_team = get_current_team();
     Player *current_player = current_team->get_current_player();
+    if (current_player->has_action() && current_player->in_play()) {
+        if (DEBUG) {
+            std::cout << "GAME:get_current_player() Current player still has action. Returning current player." << std::endl;
+        }
+        return current_player;
+    }
+
     if (current_player->is_dead() || current_player->turn_skipped()) {
-        current_player->unskip_turn();
+        if (!current_player->in_play()) {
+            current_player->unskip_turn();
+        }
         // DEBUG CODE
         if (DEBUG && current_player->turn_skipped()) {
             std::cout << "GAME:get_current_player() Current player is skipped. Finding new player." << std::endl;
@@ -85,6 +94,7 @@ Player *Game::get_current_player() {
             std::cout << "GAME:get_current_player() Current player is dead. Finding new player." << std::endl;
         }
         // END DEBUG CODE
+        current_player->unskip_turn();
         current_team->go_to_next_player();
         current_player = current_team->get_current_player();
     }
@@ -98,6 +108,10 @@ Player *Game::get_current_player() {
 
 Team *Game::get_current_team() {
     Team *current_team = get_team(current_team_idx);
+    Player *current_player = current_team->get_current_player();
+    if (current_player->has_action()) {
+        return current_team;
+    }
     if (!(current_team->can_play()) || current_team->is_skipped() || current_team->is_dead()) {
         if (DEBUG && current_team->is_skipped()) {
             std::cout << "GAME:get_current_team() Current team is skipped. Finding new team." << std::endl;
@@ -144,10 +158,22 @@ void Game::go_to_next_team() {
 }
 
 void Game::go_to_next_player() {
-    Team *current_team = get_current_team();
-    current_team->go_to_next_player();
-    current_team->clear_skips();
+    Team *current_team = get_team(current_team_idx);
+    Player *current_player = current_team->get_current_player();
+    current_player->use_action();
+    if (current_player->has_action()) {
+        // DEBUG CODE
+        if (DEBUG) {
+            std::cout << "GAME:go_to_next_player() Current player still has action. Consuming action and continuing." << std::endl;
+        }
+        // END DEBUG CODE
+        return;
+    }
     go_to_next_team();
+    current_team->go_to_next_player();
+    if (!current_team->can_play()) {
+        current_team->clear_skips();
+    }
 }
 
 void Game::move(std::string command) {
@@ -199,12 +225,9 @@ void Game::move(std::string command) {
         }
         current_player->distribute_feet(ix);
     }
-    current_player->use_action();
     check_win_condition();
     if (!is_ongoing()) return;
-    if (!current_player->has_turn()) {
-        go_to_next_player();
-    }
+    go_to_next_player();
 }
 
 void Game::check_win_condition() {
