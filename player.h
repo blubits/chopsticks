@@ -277,6 +277,9 @@ Doggo::Doggo(int player_order) : Player(player_order, 'd', &DOGGO_INFO) {}
 Appendage *Doggo::recieve_tap(Appendage *my_appendage, Player *tapper,
                               Appendage *source_appendage) {
     if (tapper->get_player_type() != 'd') {
+        if (DEBUG) {
+            std::cout << "PLAYER:receive_tap() Tapped a doggo. Skipping next turn." << std::endl;
+        }
         tapper->skip_turn();
     }
     return my_appendage;

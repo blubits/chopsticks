@@ -114,7 +114,13 @@ void Team::go_to_next_player() {
         }
         // END DEBUG CODE
         clear_skips();
+        return;
     }
+
+    // if (get_current_player()->turn_skipped()) {
+    //     get_current_player()->unskip_turn();
+    // }
+
     int _ = 1;
     for (; _ <= size(); _++) {
         current_player_idx = (current_player_idx + 1) % size();

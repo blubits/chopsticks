@@ -76,6 +76,7 @@ Player *Game::get_current_player() {
     Team *current_team = get_current_team();
     Player *current_player = current_team->get_current_player();
     if (current_player->is_dead() || current_player->turn_skipped()) {
+        current_player->unskip_turn();
         // DEBUG CODE
         if (DEBUG && current_player->turn_skipped()) {
             std::cout << "GAME:get_current_player() Current player is skipped. Finding new player." << std::endl;
