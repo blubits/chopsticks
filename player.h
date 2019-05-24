@@ -45,6 +45,7 @@ class Player {
     void give_turn();
     void skip_turn();
     void unskip_turn();
+    char get_type();
 
     // Distributes digits to hands and/or feet.
     void distribute_hands(std::vector<int> input);
@@ -180,6 +181,10 @@ void Player::tap(std::string my_appendage, Player *player,
     // call tap recievers to prepare for the tap
     Appendage *new_mine = give_tap(mine, player, theirs);
     Appendage *new_theirs = player->recieve_tap(theirs, this, mine);
+}
+
+char Player::get_type() {
+    return player_type;
 }
 
 std::ostream &operator<<(std::ostream &os, Player &dt) {

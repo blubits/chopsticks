@@ -171,9 +171,9 @@ void Game::go_to_next_player() {
     }
     go_to_next_team();
     current_team->go_to_next_player();
-    if (!current_team->can_play()) {
-        current_team->clear_skips();
-    }
+    // if (!current_team->can_play()) {
+    //     current_team->clear_skips();
+    // }
 }
 
 void Game::move(std::string command) {
@@ -245,6 +245,10 @@ void Game::check_win_condition() {
 }
 
 std::ostream &operator<<(std::ostream &os, Game &dt) {
+    Player *current_player = dt.get_current_player();
+    if (current_player->get_type() == 'z' && current_player->in_play()) {
+        return os;
+    }
     for (int i = 0; i < dt.num_teams(); i++) {
         // if (DEBUG && dt.current_team_idx == i) {
         //     os << "> ";

@@ -96,7 +96,7 @@ void Team::clear_skips() {
 }
 
 void Team::go_to_next_player() {
-    if (is_dead() || get_current_player()->has_action()) {
+    if (is_dead()) {
         // DEBUG CODE
         if (DEBUG && is_dead()) {
             std::cout << "TEAM:go_to_next_player() Team is dead, cannot change players." << std::endl;
@@ -107,15 +107,15 @@ void Team::go_to_next_player() {
         return;
     }
 
-    if (is_skipped()) {
-        // DEBUG CODE
-        if (DEBUG) {
-            std::cout << "TEAM:go_to_next_player() Team is skipped. Clearing skips." << std::endl;
-        }
-        // END DEBUG CODE
-        clear_skips();
-        return;
-    }
+    // if (!can_play()) {
+    //     // DEBUG CODE
+    //     if (DEBUG) {
+    //         std::cout << "TEAM:go_to_next_player() Team is skipped. Clearing skips." << std::endl;
+    //     }
+    //     // END DEBUG CODE
+    //     clear_skips();
+    //     return;
+    // }
 
     // if (get_current_player()->turn_skipped()) {
     //     get_current_player()->unskip_turn();
