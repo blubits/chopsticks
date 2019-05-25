@@ -36,7 +36,7 @@ class Game {
     Player *get_current_player();
     void go_to_next_player();
 
-    bool is_valid_command();
+    bool is_valid_command(Player *player, std::string command);
 
     void move(std::string command);
 
@@ -60,8 +60,8 @@ bool Game::is_ongoing() { return ongoing; }
 int Game::who_won() { return team_idx_won; }
 
 void Game::push_player(int player_team, std::string player_type) {
-    Player *new_player =
-        PlayerFactory::make_player(players.size() + 1, player_type);
+    Player *new_player = PlayerFactory::make_player(
+        player_team, players.size() + 1, player_type);
     players.push_back(new_player);
     teams[player_team]->add_player(new_player);
 };
@@ -283,6 +283,70 @@ std::ostream &operator<<(std::ostream &os, Game &dt) {
         os << "Team " << i + 1 << ": " << *(dt.get_team(i)) << std::endl;
     }
     return os;
+}
+
+bool Game::is_valid_command(Player *player, std::string command) {
+    std::stringstream ss(command);
+    std::string cmd;
+    ss >> cmd;
+    if (cmd == "tap") {
+        std::string source_appendage_idx, target_appendage_idx;
+        int target_player_idx;
+        ss >> source_appendage_idx >> target_player_idx >> target_appendage_idx;
+        Player *target_player = players[target_player_idx - 1];
+
+        // friendly fire
+        if (player->get_player_team() == target_player->get_player_team())
+            return false;
+        // target player is dead
+        if (target_player->is_dead()) return false;
+        // appendage check
+        try {
+            Appendage *source_appendage =
+                player->get_appendage(source_appendage_idx);
+            Appendage *target_appendage =
+                target_player->get_appendage(target_appendage_idx);
+            // source or target appendage is dead
+            if (source_appendage->is_dead() || target_appendage->is_dead())
+                return false;
+        } catch (const std::out_of_range &e) {
+            // source or target appendage does not exist
+            return false;
+        }
+        return true;
+    } else if (cmd == "disthands") {
+        int x, i = 0, sum_x = 0, sum_hands = 0;
+        while (ss >> x) {
+            // the disthands command distributes fingers even to
+            // already-dead hands. thus, only add to the sum
+            // of fingers on a player if the hand being checked
+            // is still alive, since those are the relevant fingers.
+            if (!(player->get_hand(i++)->is_dead())) sum_x += x;
+        }
+        for (auto &h : *(player->get_hands())) {
+            if (!h->is_dead()) sum_hands += h->get_digits_raised();
+        }
+        // number of fingers up does not match hands distributed
+        if (sum_x == sum_hands)
+            return true;
+        else
+            return false;
+    } else if (cmd == "distfeet") {
+        int x, i = 0, sum_x = 0, sum_feet = 0;
+        while (ss >> x) {
+            // see comment on disthands
+            if (!(player->get_foot(i++)->is_dead()) sum_x += x;
+        }
+        // number of toes up does not match hands distributed
+        for (auto &f : *(player->get_feet())) {
+            if (!f->is_dead()) sum_feet += f->get_digits_raised();
+        }
+        if (sum_x == sum_feet)
+            return true;
+        else
+            return false;
+    }
+    return false;
 }
 
 #endif
