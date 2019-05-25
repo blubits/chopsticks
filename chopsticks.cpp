@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
         // Attempt to create a server
         if (is_valid_port(argv[0])) {
             Server *server = new Server();
-            server.start();
+            server.start(argv[0]);
         } else {
             std::cout << "Please chosoe a valid port between 1024-65535" << std::endl
         }
