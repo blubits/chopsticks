@@ -36,6 +36,8 @@ class Game {
     Player *get_current_player();
     void go_to_next_player();
 
+    bool is_valid_command();
+
     void move(std::string command);
 
     void check_win_condition();
@@ -77,7 +79,9 @@ Player *Game::get_current_player() {
     Player *current_player = current_team->get_current_player();
     if (current_player->has_action() && current_player->in_play()) {
         if (DEBUG) {
-            std::cout << "GAME:get_current_player() Current player still has action. Returning current player." << std::endl;
+            std::cout << "GAME:get_current_player() Current player still has "
+                         "action. Returning current player."
+                      << std::endl;
         }
         return current_player;
     }
@@ -88,10 +92,14 @@ Player *Game::get_current_player() {
         }
         // DEBUG CODE
         if (DEBUG && current_player->turn_skipped()) {
-            std::cout << "GAME:get_current_player() Current player is skipped. Finding new player." << std::endl;
+            std::cout << "GAME:get_current_player() Current player is skipped. "
+                         "Finding new player."
+                      << std::endl;
         }
         if (DEBUG && current_player->is_dead()) {
-            std::cout << "GAME:get_current_player() Current player is dead. Finding new player." << std::endl;
+            std::cout << "GAME:get_current_player() Current player is dead. "
+                         "Finding new player."
+                      << std::endl;
         }
         // END DEBUG CODE
         current_player->unskip_turn();
@@ -100,7 +108,8 @@ Player *Game::get_current_player() {
     }
     // DEBUG CODE
     if (DEBUG) {
-        std::cout << "GAME:get_current_player() Getting player " << *current_player << std::endl;
+        std::cout << "GAME:get_current_player() Getting player "
+                  << *current_player << std::endl;
     }
     // END DEBUG CODE
     return current_player;
@@ -112,20 +121,28 @@ Team *Game::get_current_team() {
     if (current_player->has_action()) {
         return current_team;
     }
-    if (!(current_team->can_play()) || current_team->is_skipped() || current_team->is_dead()) {
+    if (!(current_team->can_play()) || current_team->is_skipped() ||
+        current_team->is_dead()) {
         if (DEBUG && current_team->is_skipped()) {
-            std::cout << "GAME:get_current_team() Current team is skipped. Finding new team." << std::endl;
+            std::cout << "GAME:get_current_team() Current team is skipped. "
+                         "Finding new team."
+                      << std::endl;
         } else if (DEBUG && current_team->is_dead()) {
-            std::cout << "GAME:get_current_team() Current team is dead. Finding new team." << std::endl;
+            std::cout << "GAME:get_current_team() Current team is dead. "
+                         "Finding new team."
+                      << std::endl;
         } else if (!(current_team->can_play())) {
-            std::cout << "GAME:get_current_team() Current team cannot play. Finding new team." << std::endl;
+            std::cout << "GAME:get_current_team() Current team cannot play. "
+                         "Finding new team."
+                      << std::endl;
         }
         go_to_next_team();
         current_team = get_team(current_team_idx);
     }
     // DEBUG CODE
     if (DEBUG) {
-        std::cout << "GAME:get_current_team() Getting team " << current_team_idx + 1 << std::endl;
+        std::cout << "GAME:get_current_team() Getting team "
+                  << current_team_idx + 1 << std::endl;
     }
     // END DEBUG CODE
     return current_team;
@@ -134,14 +151,18 @@ Team *Game::get_current_team() {
 void Game::go_to_next_team() {
     current_team_idx = (current_team_idx + 1) % num_teams();
     Team *current_team = get_team(current_team_idx);
-    while (!(current_team->can_play()) || current_team->is_skipped() || current_team->is_dead()) {
+    while (!(current_team->can_play()) || current_team->is_skipped() ||
+           current_team->is_dead()) {
         // DEBUG CODE
         if (DEBUG && current_team->is_skipped()) {
-            std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1 << " is skipped. Looking for new team." << std::endl;
+            std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1
+                      << " is skipped. Looking for new team." << std::endl;
         } else if (DEBUG && current_team->is_dead()) {
-            std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1 << " is dead. Looking for new team." << std::endl;
+            std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1
+                      << " is dead. Looking for new team." << std::endl;
         } else if (DEBUG && !(current_team->can_play())) {
-            std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1 << " cannot play. Looking for new team." << std::endl;
+            std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1
+                      << " cannot play. Looking for new team." << std::endl;
         }
         // END DEBUG CODE
         if (current_team->is_skipped() || !(current_team->can_play())) {
@@ -152,7 +173,8 @@ void Game::go_to_next_team() {
     }
     // DEBUG CODE
     if (DEBUG) {
-        std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1 << " is next to play." << std::endl;
+        std::cout << "GAME:go_to_next_team() Team " << current_team_idx + 1
+                  << " is next to play." << std::endl;
     }
     // END DEBUG CODE
 }
@@ -164,7 +186,9 @@ void Game::go_to_next_player() {
     if (current_player->has_action()) {
         // DEBUG CODE
         if (DEBUG) {
-            std::cout << "GAME:go_to_next_player() Current player still has action. Consuming action and continuing." << std::endl;
+            std::cout << "GAME:go_to_next_player() Current player still has "
+                         "action. Consuming action and continuing."
+                      << std::endl;
         }
         // END DEBUG CODE
         return;
@@ -179,7 +203,8 @@ void Game::go_to_next_player() {
 void Game::move(std::string command) {
     // DEBUG CODE
     // if (DEBUG) {
-    //     std::cout << "GAME:move() Attempting to get current player" << std::endl;
+    //     std::cout << "GAME:move() Attempting to get current player" <<
+    //     std::endl;
     // }
     // END DEBUG CODE
 
@@ -187,10 +212,12 @@ void Game::move(std::string command) {
     if (current_player == nullptr || !is_ongoing()) {
         // DEBUG CODE
         if (DEBUG && current_player == nullptr) {
-            std::cout << "GAME:move() Current player is null, returning" << std::endl;
+            std::cout << "GAME:move() Current player is null, returning"
+                      << std::endl;
         }
         if (DEBUG && !is_ongoing()) {
-            std::cout << "GAME:move() Game is not ongoing, returning" << std::endl;
+            std::cout << "GAME:move() Game is not ongoing, returning"
+                      << std::endl;
         }
         // END DEBUG CODE
 
