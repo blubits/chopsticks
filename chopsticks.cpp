@@ -2,15 +2,17 @@
 
 #include <iostream>
 #include "aux.h"
-#include "ctype.h"
-#include "game.h"
-#include "stdlib.h"
+#include "server.h"
 
-using namespace std;
-
-int main(int argc, char *argv) {
+int main(int argc, char *argv[]) {
     if (argc == 1) {
         // Attempt to create a server
+        if (is_valid_port(argv[0])) {
+            Server *server = new Server();
+            server.start();
+        } else {
+            std::cout << "Please chosoe a valid port between 1024-65535" << std::endl
+        }
 
     } else if (argc == 2) {
         // Attempt to create a client
