@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
             Server *server = new Server();
             server->start(argv[1]);
         } else {
-            std::cout << "Please chosoe a valid port between 1024-65535 to start a server" << std::endl;
+            std::cout << "Please chose a valid port between 1024-65535 to start a server" << std::endl;
             return -1;
         }
 
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
             Client *client = new Client();
             client->start(argv[1], argv[2]);
         } else {
-            std::cout << "Please chosoe a valid port between 1024-65535 to start a client" << std::endl;
+            std::cout << "Please chose a valid port between 1024-65535 to start a client" << std::endl;
             return -1;
         }
     } else {
