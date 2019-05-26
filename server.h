@@ -42,6 +42,7 @@ void Server::init_players() {
         std::cout << "Please enter a player type (human, zombie, alien, doggo): " << std::endl;
         getline(std::cin, line);
         if (is_valid_player_type(line)) {
+            player_types[0] = line;
             break;
         }
     }
@@ -61,10 +62,6 @@ void Server::init_players() {
             }
         }
 
-        //Broadcast player_number to new_client
-        // *new_client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-        // *new_client << "You are player number " << i + 1 << std::endl;
-
         // Request the new player's type
         while (true) {
             *new_client << static_cast<int>(CODES::REQUEST_NEW_INPUT) << std::endl;
@@ -75,11 +72,18 @@ void Server::init_players() {
                 while (!getline(*new_client, line)) {
                 };
                 if (is_valid_player_type(line)) {
+                    player_types[i] = line;
                     break;
                 }
             }
         }
+
+        // Broadcast player_number and type to new_client
+        *new_client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
+        *new_client << "You are player number " << i + 1 << " playing as a " << player_types[i] << "." << std::endl;
     }
+
+
 
     std::cout << "All players have connected!!!" << std::endl;
     for (auto client : clients) {
