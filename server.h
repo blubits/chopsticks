@@ -30,6 +30,18 @@ void Server::init_players() {
     while (num_players < 2 || num_players > 6) {
         std::cout << "Please input number of players:" << std::endl;
         std::cin >> num_players;
+        std::cin.ignore();
+    }
+
+    std::string player_types[num_players];
+    int player_teams[num_players];
+
+    while (true) {
+        std::cout << "Please enter a player type (human, zombie, alien, doggo): " << std::endl;
+        getline(std::cin, line);
+        if (is_valid_player_type(line)) {
+            break;
+        }
     }
 
     for (int i = 1; i < num_players; i++) {
@@ -47,10 +59,14 @@ void Server::init_players() {
             }
         }
 
+        //Broadcast player_number to new_client
+        // *new_client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
+        // *new_client << "You are player number " << i + 1 << std::endl;
+
         // Request the new player's type
         while (true) {
             *new_client << static_cast<int>(CODES::REQUEST_NEW_INPUT) << std::endl;
-            *new_client << "Please enter a player type (human, zombie, alien, doggo)" << std::endl;
+            *new_client << "Please enter a player type (human, zombie, alien, doggo): " << std::endl;
             *new_client >> code;
             new_client->ignore();
             if (code == static_cast<int>(CODES::NEW_INPUT)) {
