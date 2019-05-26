@@ -335,7 +335,7 @@ bool Game::is_valid_command(Player *player, std::string command) {
         int x, i = 0, sum_x = 0, sum_feet = 0;
         while (ss >> x) {
             // see comment on disthands
-            if (!(player->get_foot(i++)->is_dead()) sum_x += x;
+            if (!(player->get_foot(i++)->is_dead())) sum_x += x;
         }
         // number of toes up does not match hands distributed
         for (auto &f : *(player->get_feet())) {

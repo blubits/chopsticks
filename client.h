@@ -9,7 +9,7 @@ class Client {
     int player_team;
 
    public:
-    Client();
+    // Client();
     void start(char* ip, char* port);
 };
 
