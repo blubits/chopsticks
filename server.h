@@ -11,8 +11,10 @@ class Server {
    private:
     swoope::socketstream *server;
     std::vector<swoope::socketstream *> clients;
-    Game* game;
+    Game *game;
     int num_players;
+
+    void init_players();
 
    public:
     Server();
@@ -21,16 +23,9 @@ class Server {
 
 Server::Server() : num_players(1) {}
 
-void Server::start(char *port) {
-    std::cout << "Attempting to start server" << std::endl;
-
-    server = new swoope::socketstream();
-    server->open(port, 4);
-    game = Game();
+void Server::init_players() {
     int code;
     std::string line;
-
-    std::cout << "Started server succesfully" << std::endl;
 
     while (num_players < 2 || num_players > 6) {
         std::cout << "Please input number of players:" << std::endl;
@@ -68,6 +63,16 @@ void Server::start(char *port) {
         *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
         *client << "All players have connected!!!" << std::endl;
     }
+}
+
+void Server::start(char *port) {
+    std::cout << "Attempting to start server" << std::endl;
+
+    server = new swoope::socketstream();
+    server->open(port, 4);
+    game = new Game();
+
+    std::cout << "Started server succesfully" << std::endl;
 }
 
 #endif
