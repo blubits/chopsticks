@@ -1,3 +1,6 @@
+#ifndef PROTOCOL_H
+#define PROTOCOL_H
+
 enum class CODES : int {
     NEW_BROADCAST = 0,
     REQUEST_NEW_INPUT = 100,
@@ -6,3 +9,5 @@ enum class CODES : int {
     TERMINATE_CONNECTION = 400,
     PLAYER_DISCONNECT = 401
 };
+
+#endif
