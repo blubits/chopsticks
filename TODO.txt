@@ -1,0 +1,2 @@
+- Decouple implementation *.cpp from declaration *.h
+- Turn stuff into MVC

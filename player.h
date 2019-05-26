@@ -17,6 +17,7 @@
 // Represents a game player.
 class Player {
    protected:
+    int player_team;
     int player_order;
     char player_type;
     const PlayerInfo *player_info;
@@ -28,9 +29,14 @@ class Player {
     int actions_remaining;
 
    public:
-    Player(int player_order, char player_type, const PlayerInfo *player_info);
+    Player(int player_team, int player_order, char player_type,
+           const PlayerInfo *player_info);
 
+    int get_player_team() const;
     char get_player_type() const;
+    int get_player_order() const;
+    vector<Hand *> *get_hands();
+    vector<Feet *> *get_feet();
     Hand *get_hand(int i);
     Foot *get_foot(int i);
     Appendage *get_appendage(std::string i);
@@ -71,9 +77,10 @@ class Player {
     friend std::ostream &operator<<(std::ostream &os, Player &dt);
 };
 
-Player::Player(int player_order, char player_type,
+Player::Player(int player_team, int player_order, char player_type,
                const PlayerInfo *player_info)
-    : player_order(player_order),
+    : player_team(player_team),
+      player_order(player_order),
       player_type(player_type),
       player_info(player_info),
       actions_remaining(0),
@@ -86,7 +93,14 @@ Player::Player(int player_order, char player_type,
     }
 }
 
+int Player::get_player_order() const { return player_order; }
+
+int Player::get_player_team() const { return player_team; }
+
 char Player::get_player_type() const { return player_type; }
+
+vector<Hand *> *get_hands(int i) { return &hands; }
+vector<Feet *> *get_feet(int i) { return &feet; }
 
 Hand *Player::get_hand(int i) { return hands.at(i); }
 
@@ -112,21 +126,15 @@ bool Player::is_dead() {
 
 bool Player::has_turn() { return !is_skipped; }
 
-bool Player::turn_skipped() {
-    return is_skipped;
-}
+bool Player::turn_skipped() { return is_skipped; }
 
-void Player::use_action() {
-    actions_remaining--;
-}
+void Player::use_action() { actions_remaining--; }
 
 void Player::reset_actions() {
     actions_remaining = player_info->actions_per_turn;
 }
 
-bool Player::has_action() {
-    return actions_remaining > 0;
-}
+bool Player::has_action() { return actions_remaining > 0; }
 
 void Player::give_turn() {
     if (turn_skipped()) return;
@@ -166,7 +174,8 @@ void Player::tap(std::string my_appendage, Player *player,
     Appendage *theirs = player->get_appendage(target_appendage);
 
     if (DEBUG) {
-        std::cout << "PLAYER:tap() " << *this << " is tapping " << *player << std::endl;
+        std::cout << "PLAYER:tap() " << *this << " is tapping " << *player
+                  << std::endl;
     }
 
     // if either of above returns nullptr, the appendage DNE
@@ -183,9 +192,7 @@ void Player::tap(std::string my_appendage, Player *player,
     Appendage *new_theirs = player->recieve_tap(theirs, this, mine);
 }
 
-char Player::get_type() {
-    return player_type;
-}
+char Player::get_type() { return player_type; }
 
 std::ostream &operator<<(std::ostream &os, Player &dt) {
     os << "P" << dt.player_order << dt.player_type;
@@ -210,21 +217,24 @@ std::ostream &operator<<(std::ostream &os, Player &dt) {
 // No special attributes are assigned to this player.
 class Human : public Player {
    public:
-    Human(int player_order);
+    Human(int player_team, int player_order);
     Appendage *recieve_tap(Appendage *my_appendage, Player *tapper,
                            Appendage *source_appendage) override;
     Appendage *give_tap(Appendage *my_appendage, Player *tapped,
                         Appendage *target_appendage) override;
 };
 
-Human::Human(int player_order) : Player(player_order, 'h', &HUMAN_INFO) {}
+Human::Human(int player_team, int player_order)
+    : Player(player_team, player_order, 'h', &HUMAN_INFO) {}
 
 Appendage *Human::recieve_tap(Appendage *my_appendage, Player *tapper,
                               Appendage *source_appendage) {
     // skip my turn if my foot died
     if (my_appendage->get_appendage_type() == 'F' && my_appendage->is_dead()) {
         if (DEBUG) {
-            std::cout << "PLAYER:receive_tap() Target's foot has died. Skipping next turn." << std::endl;
+            std::cout << "PLAYER:receive_tap() Target's foot has died. "
+                         "Skipping next turn."
+                      << std::endl;
         }
         skip_turn();
     }
@@ -240,14 +250,15 @@ Appendage *Human::give_tap(Appendage *my_appendage, Player *tapped,
 // The alien does not skip a turn if their foot died.
 class Alien : public Player {
    public:
-    Alien(int player_order);
+    Alien(int player_team, int player_order);
     Appendage *recieve_tap(Appendage *my_appendage, Player *tapper,
                            Appendage *source_appendage) override;
     Appendage *give_tap(Appendage *my_appendage, Player *tapped,
                         Appendage *target_appendage) override;
 };
 
-Alien::Alien(int player_order) : Player(player_order, 'a', &ALIEN_INFO) {}
+Alien::Alien(int player_team, int player_order)
+    : Player(player_team, player_order, 'a', &ALIEN_INFO) {}
 
 Appendage *Alien::recieve_tap(Appendage *my_appendage, Player *tapper,
                               Appendage *source_appendage) {
@@ -266,14 +277,15 @@ class Zombie : public Player {
     bool has_respawn = true;
 
    public:
-    Zombie(int player_order);
+    Zombie(int player_team, int player_order);
     Appendage *recieve_tap(Appendage *my_appendage, Player *tapper,
                            Appendage *source_appendage) override;
     Appendage *give_tap(Appendage *my_appendage, Player *tapped,
                         Appendage *target_appendage) override;
 };
 
-Zombie::Zombie(int player_order) : Player(player_order, 'z', &ZOMBIE_INFO) {}
+Zombie::Zombie(int player_team, int player_order)
+    : Player(player_team, player_order, 'z', &ZOMBIE_INFO) {}
 
 Appendage *Zombie::recieve_tap(Appendage *my_appendage, Player *tapper,
                                Appendage *source_appendage) {
@@ -292,28 +304,33 @@ Appendage *Zombie::give_tap(Appendage *my_appendage, Player *tapped,
 // Any non-doggo who taps a doggo skips his turn.
 class Doggo : public Player {
    public:
-    Doggo(int player_order);
+    Doggo(int player_team, int player_order);
     Appendage *recieve_tap(Appendage *my_appendage, Player *tapper,
                            Appendage *source_appendage) override;
     Appendage *give_tap(Appendage *my_appendage, Player *tapped,
                         Appendage *target_appendage) override;
 };
 
-Doggo::Doggo(int player_order) : Player(player_order, 'd', &DOGGO_INFO) {}
+Doggo::Doggo(int player_team, int player_order)
+    : Player(player_team, player_order, 'd', &DOGGO_INFO) {}
 
 Appendage *Doggo::recieve_tap(Appendage *my_appendage, Player *tapper,
                               Appendage *source_appendage) {
     // skip my turn if my foot died
     if (my_appendage->get_appendage_type() == 'F' && my_appendage->is_dead()) {
         if (DEBUG) {
-            std::cout << "PLAYER:receive_tap() Target's foot has died. Skipping next turn." << std::endl;
+            std::cout << "PLAYER:receive_tap() Target's foot has died. "
+                         "Skipping next turn."
+                      << std::endl;
         }
         skip_turn();
     }
 
     if (tapper->get_player_type() != 'd') {
         if (DEBUG) {
-            std::cout << "PLAYER:receive_tap() Tapped a giant donggo. Skipping next turn." << std::endl;
+            std::cout << "PLAYER:receive_tap() Tapped a giant donggo. Skipping "
+                         "next turn."
+                      << std::endl;
         }
         tapper->skip_turn();
     }
@@ -327,18 +344,20 @@ Appendage *Doggo::give_tap(Appendage *my_appendage, Player *tapped,
 // A factory for Player objects.
 class PlayerFactory {
    public:
-    static Player *make_player(int player_order, std::string player_type);
+    static Player *make_player(int player_team, int player_order,
+                               std::string player_type);
 };
 
-Player *PlayerFactory::make_player(int player_order, std::string player_type) {
+Player *PlayerFactory::make_player(int player_team, int player_order,
+                                   std::string player_type) {
     if (player_type == "human") {
-        return new Human(player_order);
+        return new Human(player_team, player_order);
     } else if (player_type == "alien") {
-        return new Alien(player_order);
+        return new Alien(player_team, player_order);
     } else if (player_type == "zombie") {
-        return new Zombie(player_order);
+        return new Zombie(player_team, player_order);
     } else if (player_type == "doggo") {
-        return new Doggo(player_order);
+        return new Doggo(player_team, player_order);
     };
     return nullptr;
 };
