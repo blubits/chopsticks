@@ -1,8 +1,8 @@
 // CS12 S - Batara, Salinas
 
 #include <iostream>
-#include "aux.h"
 #include "client.h"
+#include "helpers.h"
 #include "server.h"
 
 int main(int argc, char *argv[]) {
