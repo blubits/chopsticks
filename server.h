@@ -43,17 +43,22 @@ void Server::init_players() {
         if (i != num_players - 1) {
             for (auto client : clients) {
                 *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-                *client << "Waiting for players..." << std::endl;
+                *client << "A new player has connected. Waiting for more players..." << std::endl;
             }
         }
 
         // Request the new player's type
         while (true) {
+            *new_client << static_cast<int>(CODES::REQUEST_NEW_INPUT) << std::endl;
+            *new_client << "Please enter a player type (human, zombie, alien, doggo)" << std::endl;
             *new_client >> code;
             new_client->ignore();
             if (code == static_cast<int>(CODES::NEW_INPUT)) {
                 while (!getline(*new_client, line)) {
                 };
+                if (is_valid_player_type(line)) {
+                    break;
+                }
             }
         }
     }
@@ -73,6 +78,8 @@ void Server::start(char *port) {
     game = new Game();
 
     std::cout << "Started server succesfully" << std::endl;
+
+    init_players();
 }
 
 #endif
