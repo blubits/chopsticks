@@ -9,9 +9,9 @@
 
 class Server {
    private:
-    swoope::socketstream server;
+    swoope::socketstream *server;
     std::vector<swoope::socketstream *> clients;
-    Game game;
+    Game* game;
     int num_players;
 
    public:
@@ -24,8 +24,8 @@ Server::Server() : num_players(1) {}
 void Server::start(char *port) {
     std::cout << "Attempting to start server" << std::endl;
 
-    server = swoope::socketstream();
-    server.open(port, 4);
+    server = new swoope::socketstream();
+    server->open(port, 4);
     game = Game();
     int code;
     std::string line;
@@ -41,7 +41,7 @@ void Server::start(char *port) {
         std::cout << "Waiting for players..." << std::endl;
         clients.push_back(new swoope::socketstream());
         swoope::socketstream *new_client = clients.back();
-        server.accept(*new_client);
+        server->accept(*new_client);
         std::cout << "Accepted connection from " << clients.back()->remote_address() << std::endl;
 
         // Broadcast to clients that a new player has connected
