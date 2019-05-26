@@ -5,7 +5,13 @@
 #ifndef AUX_h
 #define AUX_H
 
-bool is_valid_port(char *port) {
+bool is_number(const std::string& s) {
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
+
+bool is_valid_port(char* port) {
     int i = 0;
     while (port[i] != '\0') {
         if (!isdigit(port[i])) {

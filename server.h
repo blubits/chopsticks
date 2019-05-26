@@ -29,8 +29,10 @@ void Server::init_players() {
 
     while (num_players < 2 || num_players > 6) {
         std::cout << "Please input number of players:" << std::endl;
-        std::cin >> num_players;
-        std::cin.ignore();
+        getline(std::cin, line);
+        if (is_number(line) && atol(line.c_str())) {
+            num_players = atol(line.c_str());
+        }
     }
 
     std::string player_types[num_players];
