@@ -204,15 +204,11 @@ void Server::start_game() {
     game->start_game();
 
     // Print the current state of the game
+    std::cout << *game << std::endl;
     std::stringstream ss;
-    ss << game << std::endl;
-    while (!getline(ss, line)) {
-        std::cout << line << std::endl;
-    }
-    ss.clear();
     for (auto client : clients) {
-        ss << game << std::endl;
-        while (!getline(ss, line)) {
+        ss << *game << std::endl;
+        while (getline(ss, line)) {
             *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
             *client << line << std::endl;
         }
@@ -262,15 +258,10 @@ void Server::start_game() {
         std::cout << "Player " << current_player_idx + 1 << ": " << line << std::endl;
 
         // Print the current state of the game
-        std::stringstream ss;
-        ss << game << std::endl;
-        while (!getline(ss, line)) {
-            std::cout << line << std::endl;
-        }
-        ss.clear();
+        std::cout << *game << std::endl;
         for (auto client : clients) {
-            ss << game << std::endl;
-            while (!getline(ss, line)) {
+            ss << *game << std::endl;
+            while (getline(ss, line)) {
                 *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
                 *client << line << std::endl;
             }
