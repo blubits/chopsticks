@@ -1,3 +1,4 @@
+#include <sstream>
 #include <string>
 #include <vector>
 #include "game.h"
@@ -196,6 +197,98 @@ void Server::init_players() {
     }
 }
 
+void Server::start_game() {
+    int code;
+    std::string line;
+
+    game->start_game();
+
+    // Print the current state of the game
+    std::stringstream ss;
+    ss << game << std::endl;
+    while (!getline(ss, line)) {
+        std::cout << line << std::endl;
+    }
+    ss.clear();
+    for (auto client : clients) {
+        ss << game << std::endl;
+        while (!getline(ss, line)) {
+            *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
+            *client << line << std::endl;
+        }
+        ss.clear();
+    }
+    line = "";
+
+    while (true) {
+        Player *current_player = game->get_current_player();
+        int current_player_idx = current_player->get_player_order() - 1;
+        if (current_player_idx == 0) {
+            for (auto client : clients) {
+                *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
+                *client << "Waiting for player " << current_player_idx + 1 << " to move." << std::endl;
+            }
+            while (!game->is_valid_command(current_player, line)) {
+                std::cout << "Please enter your move." << std::endl;
+                getline(std::cin, line);
+            }
+            game->move(line);
+        } else {
+            std::cout << "Waiting for player " << current_player_idx + 1 << " to move." << std::endl;
+            for (int i = 0; i < clients.size(); i++) {
+                if (i != current_player_idx - 1) {
+                    *clients[i] << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
+                    *clients[i] << "Waiting for player " << current_player_idx + 1 << " to move." << std::endl;
+                }
+            }
+            swoope::socketstream *current_client = clients[current_player_idx - 1];
+
+            while (true) {
+                *current_client << static_cast<int>(CODES::REQUEST_NEW_INPUT) << std::endl;
+                *current_client << "Please enter your move." << std::endl;
+                *current_client >> code;
+                current_client->ignore();
+                if (code == static_cast<int>(CODES::NEW_INPUT)) {
+                    while (!getline(*current_client, line)) {
+                    }
+                    if (game->is_valid_command(current_player, line))
+                        break;
+                }
+            }
+            game->move(line);
+        }
+
+        // Print the current player's move
+        std::cout << "Player " << current_player_idx + 1 << ": " << line << std::endl;
+
+        // Print the current state of the game
+        std::stringstream ss;
+        ss << game << std::endl;
+        while (!getline(ss, line)) {
+            std::cout << line << std::endl;
+        }
+        ss.clear();
+        for (auto client : clients) {
+            ss << game << std::endl;
+            while (!getline(ss, line)) {
+                *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
+                *client << line << std::endl;
+            }
+            ss.clear();
+        }
+        line = "";
+
+        if (!game->is_ongoing()) {
+            std::cout << "Team " << game->who_won() + 1 << " wins!" << std::endl;
+            for (auto client : clients) {
+                *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
+                *client << "Team " << game->who_won() + 1 << " wins!" << std::endl;
+            }
+            break;
+        }
+    }
+}
+
 void Server::start(char *port) {
     std::cout << "Attempting to start server" << std::endl;
 
@@ -206,6 +299,7 @@ void Server::start(char *port) {
     std::cout << "Started server succesfully" << std::endl;
 
     init_players();
+    start_game();
 }
 
 #endif
