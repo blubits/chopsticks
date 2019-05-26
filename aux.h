@@ -7,10 +7,11 @@
 
 bool is_valid_port(char *port) {
     int i = 0;
-    while (port[i]) {
+    while (port[i] != '\0') {
         if (!isdigit(port[i])) {
             return false;
         }
+        i++;
     }
 
     long long int port_long;
