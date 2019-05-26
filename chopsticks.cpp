@@ -16,41 +16,10 @@ int main(int argc, char *argv[]) {
 
     } else if (argc == 3) {
         // Attempt to create a client
+    } else {
+        std::cout << "Please provide either a port to start a server or a valid ip and a port to start a client." << std::endl;
+        return -1;
     }
 
-    // int p;
-    // int t;
-    // cin >> p >> t;
-
-    // Game g;
-    // for (int i = 0; i < t; i++) {
-    //     g.push_team();
-    // }
-
-    // for (int i = 1; i < p + 1; i++) {
-    //     string player_type;
-    //     int player_team;
-    //     cin >> player_type >> player_team;
-    //     g.push_player(player_team - 1, player_type);
-    // }
-
-    // cin.ignore();
-    // g.start_game();
-    // cout << g << endl;
-
-    // int i = 1;
-    // string command;
-    // while (getline(cin, command)) {
-    //     if (DEBUG) {
-    //         cout << "MAIN:main() Turn #" << i << " | " << command << endl;
-    //         i++;
-    //     }
-
-    //     g.move(command);
-    //     cout << g << endl;
-    //     if (!g.is_ongoing()) {
-    //         cout << "Team " << g.who_won() + 1 << " wins!" << endl;
-    //         break;
-    //     }
-    // }
+    return 0;
 }
