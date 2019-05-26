@@ -5,16 +5,16 @@
 #include "server.h"
 
 int main(int argc, char *argv[]) {
-    if (argc == 1) {
+    if (argc == 2) {
         // Attempt to create a server
-        if (is_valid_port(argv[0])) {
+        if (is_valid_port(argv[1])) {
             Server *server = new Server();
-            server.start(argv[0]);
+            server->start(argv[1]);
         } else {
-            std::cout << "Please chosoe a valid port between 1024-65535" << std::endl
+            std::cout << "Please chosoe a valid port between 1024-65535" << std::endl;
         }
 
-    } else if (argc == 2) {
+    } else if (argc == 3) {
         // Attempt to create a client
     }
 
