@@ -2,14 +2,10 @@
 *.in
 *.out
 *.ans
-chopsticks
-error
-main
-merge.py
-main.cpp
 build/*
 *.pdf
 *.zip
+main
 
 # Prerequisites
 *.d
@@ -43,5 +39,3 @@ build/*
 *.exe
 *.out
 *.app
-chopsticks
-main.cpp
