@@ -8,6 +8,7 @@ main
 merge.py
 main.cpp
 build/*
+*.pdf
 
 # Prerequisites
 *.d
