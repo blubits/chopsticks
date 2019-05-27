@@ -241,9 +241,15 @@ void Server::start_game() {
                 *client << "Waiting for player " << current_player_idx + 1
                         << " to move." << std::endl;
             }
+            int tries = 0;
             while (!game->is_valid_command(current_player, line)) {
-                std::cout << "Please enter your move." << std::endl;
+                if (tries == 0)
+                    std::cout << "Please enter your move." << std::endl;
+                else
+                    std::cout << "Invalid input, please try again."
+                              << std::endl;
                 getline(std::cin, line);
+                tries++;
             }
             game->move(line);
         } else {
@@ -261,10 +267,15 @@ void Server::start_game() {
             swoope::socketstream *current_client =
                 clients[current_player_idx - 1];
 
+            int tries = 0;
             while (true) {
                 *current_client << static_cast<int>(CODES::REQUEST_NEW_INPUT)
                                 << std::endl;
-                *current_client << "Please enter your move." << std::endl;
+                if (tries == 0)
+                    *current_client << "Please enter your move." << std::endl;
+                else
+                    *current_client << "Invalid input, please try again."
+                                    << std::endl;
                 *current_client >> code;
                 current_client->ignore();
                 if (code == static_cast<int>(CODES::NEW_INPUT)) {
@@ -272,6 +283,7 @@ void Server::start_game() {
                     }
                     if (game->is_valid_command(current_player, line)) break;
                 }
+                tries++;
             }
             game->move(line);
         }
@@ -293,12 +305,24 @@ void Server::start_game() {
         line = "";
 
         if (!game->is_ongoing()) {
-            std::cout << "Team " << game->who_won() + 1 << " wins!"
-                      << std::endl;
+            if (game->get_player(0)->get_player_team() == game->who_won()) {
+                std::cout << "Your team wins!" << std::endl;
+            } else {
+                std::cout << "Your team lost :(" << std::endl;
+                std::cout << "Team " << game->who_won() + 1 << " wins!"
+                          << std::endl;
+            }
+            int p = 1;
             for (auto client : clients) {
                 *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-                *client << "Team " << game->who_won() + 1 << " wins!"
-                        << std::endl;
+                if (game->get_player(p++)->get_player_team() ==
+                    game->who_won()) {
+                    *client << "Your team wins!" << std::endl;
+                } else {
+                    *client << "Your team lost :(" << std::endl;
+                    *client << "Team " << game->who_won() + 1 << " wins!"
+                            << std::endl;
+                }
             }
             break;
         }

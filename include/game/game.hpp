@@ -24,6 +24,7 @@ class Game {
     int num_teams();
     Team *operator[](int index);
     Team *get_team(int index);
+    Player *get_player(int index);
     bool is_ongoing();
     int who_won();
 

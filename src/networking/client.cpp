@@ -1,5 +1,7 @@
 #include <client.hpp>
 
+int Client::get_player_number() const { return player_number; }
+
 void Client::play() {
     while (true) {
         int code = -1;

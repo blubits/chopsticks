@@ -9,6 +9,8 @@ Team *Game::operator[](int index) { return teams[index]; }
 
 Team *Game::get_team(int index) { return teams.at(index); }
 
+Player *Game::get_player(int index) { return players.at(index); }
+
 bool Game::is_ongoing() { return ongoing; }
 
 int Game::who_won() { return team_idx_won; }

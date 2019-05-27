@@ -15,6 +15,7 @@ class Client {
 
    public:
     // Client();
+    int get_player_number() const;
     void start(char* ip, char* port);
 };
 
