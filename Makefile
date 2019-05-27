@@ -31,6 +31,7 @@ ifeq ($(OS),Windows_NT)
 LINK_FLAGS = -lws2_32
 else
 LINK_FLAGS =
+endif
 
 .PHONY: default_target
 default_target: release
