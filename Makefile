@@ -27,6 +27,11 @@ INCLUDES = -I include -I include/game -I include/networking -I include/game/appe
 # Space-separated pkg-config libraries used by this project
 LIBS =
 
+ifeq ($(OS),Windows_NT)
+LINK_FLAGS = -lws2_32
+else
+LINK_FLAGS =
+
 .PHONY: default_target
 default_target: release
 
@@ -59,7 +64,7 @@ all: $(BIN_PATH)/$(BIN_NAME)
 # Creation of the executable
 $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 	@echo "Linking: $@"
-	$(CXX) $(OBJECTS) -o $@ -lws2_32
+	$(CXX) $(OBJECTS) -o $@ $(LINK_FLAGS)
 
 # Add dependency files, if they exist
 -include $(DEPS)
@@ -69,4 +74,4 @@ $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 # dependency files to provide header dependencies
 $(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
 	@echo "Compiling: $< -> $@"
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -lws2_32 -MP -MMD -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
