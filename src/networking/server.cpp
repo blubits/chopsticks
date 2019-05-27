@@ -1,27 +1,18 @@
-#include <sstream>
-#include <string>
-#include <vector>
-#include "game.h"
-#include "protocol.h"
-#include "socketstream/socketstream.hh"
+#include <server.hpp>
 
-#ifndef SERVER_H
-#define SERVER_H
+bool is_valid_player_type(std::string type) {
+    if (type == "human" || type == "alien" || type == "zombie" ||
+        type == "doggo") {
+        return true;
+    }
+    return false;
+}
 
-class Server {
-   private:
-    swoope::socketstream *server;
-    std::vector<swoope::socketstream *> clients;
-    Game *game;
-    int num_players;
-
-    void init_players();
-    void start_game();
-
-   public:
-    Server();
-    void start(char *port);
-};
+bool is_number(const std::string &s) {
+    std::string::const_iterator it = s.begin();
+    while (it != s.end() && std::isdigit(*it)) ++it;
+    return !s.empty() && it == s.end();
+}
 
 Server::Server() : num_players(1) {}
 
@@ -48,14 +39,17 @@ void Server::init_players() {
         clients.push_back(new swoope::socketstream());
         swoope::socketstream *new_client = clients.back();
         server->accept(*new_client);
-        std::cout << "Accepted connection from " << clients.back()->remote_address() << std::endl;
+        std::cout << "Accepted connection from "
+                  << clients.back()->remote_address() << std::endl;
 
         // Broadcast to clients that a new player has connected
         // Does not broadcast to the last player
         if (i != num_players - 1) {
             for (auto client : clients) {
                 *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-                *client << "A new player has connected. Waiting for more players..." << std::endl;
+                *client
+                    << "A new player has connected. Waiting for more players..."
+                    << std::endl;
             }
         }
     }
@@ -63,15 +57,19 @@ void Server::init_players() {
     std::string player_types[num_players];
 
     // Notify clients that player type selection has begun
-    std::cout << "Requesting player type from players. Please wait." << std::endl;
+    std::cout << "Requesting player type from players. Please wait."
+              << std::endl;
     for (auto client : clients) {
         *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-        *client << "Requesting player type from players. Please wait." << std::endl;
+        *client << "Requesting player type from players. Please wait."
+                << std::endl;
     }
 
     // Request each player type from each player
     while (true) {
-        std::cout << "Please enter a player type (human, zombie, alien, doggo): " << std::endl;
+        std::cout
+            << "Please enter a player type (human, zombie, alien, doggo): "
+            << std::endl;
         getline(std::cin, line);
         if (is_valid_player_type(line)) {
             player_types[0] = line;
@@ -80,15 +78,19 @@ void Server::init_players() {
     }
     for (auto client : clients) {
         *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-        *client << "Player " << 1 << " has elected to be a " << player_types[0] << "." << std::endl;
+        *client << "Player " << 1 << " has elected to be a " << player_types[0]
+                << "." << std::endl;
     }
     for (int i = 1; i < num_players; i++) {
         swoope::socketstream *current_client = clients[i - 1];
 
         // Request the new player's type
         while (true) {
-            *current_client << static_cast<int>(CODES::REQUEST_NEW_INPUT) << std::endl;
-            *current_client << "Please enter a player type (human, zombie, alien, doggo): " << std::endl;
+            *current_client << static_cast<int>(CODES::REQUEST_NEW_INPUT)
+                            << std::endl;
+            *current_client
+                << "Please enter a player type (human, zombie, alien, doggo): "
+                << std::endl;
             *current_client >> code;
             current_client->ignore();
             if (code == static_cast<int>(CODES::NEW_INPUT)) {
@@ -101,26 +103,31 @@ void Server::init_players() {
             }
         }
         // Broadcast the current client's information to other clients
-        std::cout << "Player " << i + 1 << " has elected to be a " << player_types[i] << "." << std::endl;
+        std::cout << "Player " << i + 1 << " has elected to be a "
+                  << player_types[i] << "." << std::endl;
         for (auto client : clients) {
             *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-            *client << "Player " << i + 1 << " has elected to be a " << player_types[i] << "." << std::endl;
+            *client << "Player " << i + 1 << " has elected to be a "
+                    << player_types[i] << "." << std::endl;
         }
     }
 
     int player_teams[num_players];
 
     // Notify clients that team selection has begun
-    std::cout << "Requesting player teams from players. Please wait." << std::endl;
+    std::cout << "Requesting player teams from players. Please wait."
+              << std::endl;
     for (auto client : clients) {
         *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-        *client << "Requesting player teams from players. Please wait." << std::endl;
+        *client << "Requesting player teams from players. Please wait."
+                << std::endl;
     }
 
     while (true) {
         while (true) {
             int team_number = -1;
-            std::cout << "Please input a team number between 1 and " << num_players << "." << std::endl;
+            std::cout << "Please input a team number between 1 and "
+                      << num_players << "." << std::endl;
             getline(std::cin, line);
             if (is_number(line)) {
                 team_number = atol(line.c_str());
@@ -134,8 +141,10 @@ void Server::init_players() {
             while (true) {
                 swoope::socketstream *current_client = clients[i - 1];
                 int team_number = -1;
-                *current_client << static_cast<int>(CODES::REQUEST_NEW_INPUT) << std::endl;
-                *current_client << "Please input a team number between 1 and " << num_players << "." << std::endl;
+                *current_client << static_cast<int>(CODES::REQUEST_NEW_INPUT)
+                                << std::endl;
+                *current_client << "Please input a team number between 1 and "
+                                << num_players << "." << std::endl;
                 *current_client >> code;
                 current_client->ignore();
                 if (code == static_cast<int>(CODES::NEW_INPUT)) {
@@ -156,7 +165,10 @@ void Server::init_players() {
         // Check if there are at least two teams with players
         // and that no valid team comes after a team with zero players
         bool is_valid = true;
-        int team_count[num_players] = {};
+        int team_count[num_players];
+        for (int i = 0; i < num_players; i++) {
+            team_count[i] = 0;
+        }
         for (int i = 0; i < num_players; i++) {
             team_count[player_teams[i] - 1]++;
         }
@@ -182,10 +194,14 @@ void Server::init_players() {
             }
             break;
         } else {
-            std::cout << "An invalid team configuration was entered. Restarting team selection." << std::endl;
+            std::cout << "An invalid team configuration was entered. "
+                         "Restarting team selection."
+                      << std::endl;
             for (auto client : clients) {
                 *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-                *client << "An invalid team configuration was entered. Restarting team selection." << std::endl;
+                *client << "An invalid team configuration was entered. "
+                           "Restarting team selection."
+                        << std::endl;
             }
         }
     }
@@ -222,7 +238,8 @@ void Server::start_game() {
         if (current_player_idx == 0) {
             for (auto client : clients) {
                 *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-                *client << "Waiting for player " << current_player_idx + 1 << " to move." << std::endl;
+                *client << "Waiting for player " << current_player_idx + 1
+                        << " to move." << std::endl;
             }
             while (!game->is_valid_command(current_player, line)) {
                 std::cout << "Please enter your move." << std::endl;
@@ -230,32 +247,38 @@ void Server::start_game() {
             }
             game->move(line);
         } else {
-            std::cout << "Waiting for player " << current_player_idx + 1 << " to move." << std::endl;
+            std::cout << "Waiting for player " << current_player_idx + 1
+                      << " to move." << std::endl;
             for (int i = 0; i < clients.size(); i++) {
                 if (i != current_player_idx - 1) {
-                    *clients[i] << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-                    *clients[i] << "Waiting for player " << current_player_idx + 1 << " to move." << std::endl;
+                    *clients[i] << static_cast<int>(CODES::NEW_BROADCAST)
+                                << std::endl;
+                    *clients[i] << "Waiting for player "
+                                << current_player_idx + 1 << " to move."
+                                << std::endl;
                 }
             }
-            swoope::socketstream *current_client = clients[current_player_idx - 1];
+            swoope::socketstream *current_client =
+                clients[current_player_idx - 1];
 
             while (true) {
-                *current_client << static_cast<int>(CODES::REQUEST_NEW_INPUT) << std::endl;
+                *current_client << static_cast<int>(CODES::REQUEST_NEW_INPUT)
+                                << std::endl;
                 *current_client << "Please enter your move." << std::endl;
                 *current_client >> code;
                 current_client->ignore();
                 if (code == static_cast<int>(CODES::NEW_INPUT)) {
                     while (!getline(*current_client, line)) {
                     }
-                    if (game->is_valid_command(current_player, line))
-                        break;
+                    if (game->is_valid_command(current_player, line)) break;
                 }
             }
             game->move(line);
         }
 
         // Print the current player's move
-        std::cout << "Player " << current_player_idx + 1 << ": " << line << std::endl;
+        std::cout << "Player " << current_player_idx + 1 << ": " << line
+                  << std::endl;
 
         // Print the current state of the game
         std::cout << *game << std::endl;
@@ -270,10 +293,12 @@ void Server::start_game() {
         line = "";
 
         if (!game->is_ongoing()) {
-            std::cout << "Team " << game->who_won() + 1 << " wins!" << std::endl;
+            std::cout << "Team " << game->who_won() + 1 << " wins!"
+                      << std::endl;
             for (auto client : clients) {
                 *client << static_cast<int>(CODES::NEW_BROADCAST) << std::endl;
-                *client << "Team " << game->who_won() + 1 << " wins!" << std::endl;
+                *client << "Team " << game->who_won() + 1 << " wins!"
+                        << std::endl;
             }
             break;
         }
@@ -292,5 +317,3 @@ void Server::start(char *port) {
     init_players();
     start_game();
 }
-
-#endif

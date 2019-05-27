@@ -1,33 +1,4 @@
-#ifndef TEAM_H
-#define TEAM_H
-
-#include <iostream>
-#include <sstream>
-#include "debug.h"
-#include "player.h"
-
-class Team {
-   private:
-    int current_player_idx;
-    std::vector<Player *> players;
-
-   public:
-    Team();
-    int size();
-    Player *operator[](int index);
-    Player *get_player(int index);
-    void add_player(Player *player);
-    bool is_dead();
-    bool is_skipped();
-    bool can_play();
-    void clear_skips();
-
-    Player *get_current_player();
-    void go_to_next_player();
-
-    // Directs team state to an output stream.
-    friend std::ostream &operator<<(std::ostream &os, const Team &dt);
-};
+#include "team.hpp"
 
 Team::Team() : current_player_idx(0) {}
 
@@ -70,7 +41,9 @@ Player *Team::get_current_player() {
     if (is_dead()) {
         // DEBUG CODE
         if (DEBUG) {
-            std::cout << "TEAM:get_current_player() Current player for team is dead, returning nullptr" << std::endl;
+            std::cout << "TEAM:get_current_player() Current player for team is "
+                         "dead, returning nullptr"
+                      << std::endl;
         }
         // END DEBUG CODE
         return nullptr;
@@ -78,7 +51,8 @@ Player *Team::get_current_player() {
     Player *current_player = players.at(current_player_idx);
     // DEBUG CODE
     if (DEBUG) {
-        std::cout << "TEAM:get_current_player() Returning player " << *current_player << " of current team" << std::endl;
+        std::cout << "TEAM:get_current_player() Returning player "
+                  << *current_player << " of current team" << std::endl;
     }
     // END DEBUG CODE
     return current_player;
@@ -99,9 +73,13 @@ void Team::go_to_next_player() {
     if (is_dead()) {
         // DEBUG CODE
         if (DEBUG && is_dead()) {
-            std::cout << "TEAM:go_to_next_player() Team is dead, cannot change players." << std::endl;
+            std::cout << "TEAM:go_to_next_player() Team is dead, cannot change "
+                         "players."
+                      << std::endl;
         } else if (DEBUG) {
-            std::cout << "TEAM:go_to_next_player() Current player still has actions, cannot change players" << std::endl;
+            std::cout << "TEAM:go_to_next_player() Current player still has "
+                         "actions, cannot change players"
+                      << std::endl;
         }
         // END DEBUG CODE
         return;
@@ -110,7 +88,8 @@ void Team::go_to_next_player() {
     // if (!can_play()) {
     //     // DEBUG CODE
     //     if (DEBUG) {
-    //         std::cout << "TEAM:go_to_next_player() Team is skipped. Clearing skips." << std::endl;
+    //         std::cout << "TEAM:go_to_next_player() Team is skipped. Clearing
+    //         skips." << std::endl;
     //     }
     //     // END DEBUG CODE
     //     clear_skips();
@@ -128,7 +107,9 @@ void Team::go_to_next_player() {
         if (possible_player->is_dead()) {
             // DEBUG CODE
             if (DEBUG) {
-                std::cout << "TEAM:go_to_next_player() Player " << *possible_player << " is dead. Iterating." << std::endl;
+                std::cout << "TEAM:go_to_next_player() Player "
+                          << *possible_player << " is dead. Iterating."
+                          << std::endl;
             }
             // END DEBUG CODE
             continue;
@@ -136,7 +117,10 @@ void Team::go_to_next_player() {
         if (possible_player->turn_skipped() && !possible_player->in_play()) {
             // DEBUG CODE
             if (DEBUG) {
-                std::cout << "TEAM:go_to_next_player() Player " << *possible_player << " has turn skipped. Resetting and iterating." << std::endl;
+                std::cout << "TEAM:go_to_next_player() Player "
+                          << *possible_player
+                          << " has turn skipped. Resetting and iterating."
+                          << std::endl;
             }
             // END DEBUG CODE
             possible_player->unskip_turn();
@@ -145,14 +129,16 @@ void Team::go_to_next_player() {
         possible_player->give_turn();
         // DEBUG CODE
         if (DEBUG) {
-            std::cout << "TEAM:go_to_next_player() Player " << *possible_player << " is next to play for current team." << std::endl;
+            std::cout << "TEAM:go_to_next_player() Player " << *possible_player
+                      << " is next to play for current team." << std::endl;
         }
         // END DEBUG CODE
         break;
     }
     // if (_ == size()) {
     //     if (DEBUG) {
-    //         std::cout << "TEAM:go_to_next_player() Team has wipped. Resetting team." << std::endl;
+    //         std::cout << "TEAM:go_to_next_player() Team has wipped. Resetting
+    //         team." << std::endl;
     //     }
     //     current_player_idx = 0;
     // }
@@ -167,5 +153,3 @@ std::ostream &operator<<(std::ostream &os, const Team &dt) {
     }
     return os;
 }
-
-#endif

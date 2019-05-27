@@ -1,5 +1,5 @@
-#ifndef PROTOCOL_H
-#define PROTOCOL_H
+#ifndef PROTOCOL_HPP
+#define PROTOCOL_HPP
 
 enum class CODES : int {
     NEW_BROADCAST = 0,
