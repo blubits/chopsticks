@@ -249,6 +249,7 @@ bool Game::is_valid_command(Player *player, std::string command) {
         std::string source_appendage_idx, target_appendage_idx;
         int target_player_idx;
         ss >> source_appendage_idx >> target_player_idx >> target_appendage_idx;
+        if (target_player_idx > players.size()) return false;
         Player *target_player = players[target_player_idx - 1];
 
         // friendly fire
@@ -262,6 +263,8 @@ bool Game::is_valid_command(Player *player, std::string command) {
                 player->get_appendage(source_appendage_idx);
             Appendage *target_appendage =
                 target_player->get_appendage(target_appendage_idx);
+            if (source_appendage == nullptr || target_appendage == nullptr)
+                return false;
             // source or target appendage is dead
             if (source_appendage->is_dead() || target_appendage->is_dead())
                 return false;
@@ -271,36 +274,78 @@ bool Game::is_valid_command(Player *player, std::string command) {
         }
         return true;
     } else if (cmd == "disthands") {
-        int x, i = 0, sum_x = 0, sum_hands = 0;
+        int x, sum_x = 0;
+        std::vector<int> ix, iv;
         while (ss >> x) {
-            // the disthands command distributes fingers even to
-            // already-dead hands. thus, only add to the sum
-            // of fingers on a player if the hand being checked
-            // is still alive, since those are the relevant fingers.
-            if (!(player->get_hand(i++)->is_dead())) sum_x += x;
+            ix.push_back(x);
+            sum_x += x;
+            // can't suicidal disthands
+            if (x >= player->get_player_info()->num_fingers) return false;
         }
+
+        // count sum of hands and # of alive hands
+        int sum = 0, cnt_alive = 0;
         for (auto &h : *(player->get_hands())) {
-            if (!h->is_dead()) sum_hands += h->get_digits_raised();
+            if (!(h->is_dead())) {
+                sum += h->get_digits_raised();
+                cnt_alive++;
+                iv.push_back(h->get_digits_raised());
+            }
         }
-        // number of fingers up does not match hands distributed
-        if (sum_x == sum_hands)
-            return true;
-        else
-            return false;
+
+        // can't disthands when:
+        // (1) only one hand alive
+        if (cnt_alive == 1) return false;
+        // (2) too many or too few hands specified
+        if (cnt_alive != ix.size()) return false;
+        // (3) too many or too few fingers specified
+        if (sum != sum_x) return false;
+
+        // (4) disthands makes no change
+        bool perfect_equal = true;
+        for (int i = 0; i < cnt_alive; i++) {
+            if (ix[i] != iv[i]) {
+                perfect_equal = false;
+                break;
+            }
+        }
+        if (perfect_equal) return false;
+
+        return true;
+
     } else if (cmd == "distfeet") {
-        int x, i = 0, sum_x = 0, sum_feet = 0;
+        int x, sum_x = 0;
+        std::vector<int> ix, iv;
         while (ss >> x) {
-            // see comment on disthands
-            if (!(player->get_foot(i++)->is_dead())) sum_x += x;
+            ix.push_back(x);
+            sum_x += x;
+            if (x >= player->get_player_info()->num_toes) return false;
         }
-        // number of toes up does not match hands distributed
+
+        // count sum of feet and # of alive feet
+        int sum = 0, cnt_alive = 0;
         for (auto &f : *(player->get_feet())) {
-            if (!f->is_dead()) sum_feet += f->get_digits_raised();
+            if (!(f->is_dead())) {
+                sum += f->get_digits_raised();
+                cnt_alive++;
+                iv.push_back(f->get_digits_raised());
+            }
         }
-        if (sum_x == sum_feet)
-            return true;
-        else
-            return false;
+
+        if (cnt_alive == 1) return false;
+        if (cnt_alive != ix.size()) return false;
+        if (sum != sum_x) return false;
+
+        bool perfect_equal = true;
+        for (int i = 0; i < cnt_alive; i++) {
+            if (ix[i] != iv[i]) {
+                perfect_equal = false;
+                break;
+            }
+        }
+        if (perfect_equal) return false;
+
+        return true;
     }
     return false;
 }

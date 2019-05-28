@@ -316,8 +316,6 @@ void Server::start_game() {
                                 << std::endl;
                 }
             }
-            std::cout << "current client idx: " << current_player_idx - 1
-                      << std::endl;
             swoope::socketstream *current_client =
                 clients[current_player_idx - 1];
 

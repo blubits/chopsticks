@@ -36,6 +36,7 @@ class Player {
     int get_player_team() const;
     char get_player_type() const;
     int get_player_order() const;
+    const PlayerInfo *get_player_info() const;
     std::vector<Hand *> *get_hands();
     std::vector<Foot *> *get_feet();
     Hand *get_hand(int i);

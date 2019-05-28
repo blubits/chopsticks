@@ -23,6 +23,8 @@ int Player::get_player_team() const { return player_team; }
 
 char Player::get_player_type() const { return player_type; }
 
+const PlayerInfo *Player::get_player_info() const { return player_info; }
+
 std::vector<Hand *> *Player::get_hands() { return &hands; }
 std::vector<Foot *> *Player::get_feet() { return &feet; }
 
@@ -81,14 +83,18 @@ void Player::unskip_turn() {
 void Player::distribute_hands(std::vector<int> input) {
     int i = 0;
     for (auto &hi : input) {
-        hands.at(i++)->set_digits_raised(hi);
+        while (hands.at(i++)->is_dead())
+            ;
+        hands.at(i - 1)->set_digits_raised(hi);
     }
 }
 
 void Player::distribute_feet(std::vector<int> input) {
     int i = 0;
     for (auto &hi : input) {
-        feet.at(i++)->set_digits_raised(hi);
+        while (feet.at(i++)->is_dead())
+            ;
+        feet.at(i - 1)->set_digits_raised(hi);
     }
 }
 
