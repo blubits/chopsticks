@@ -233,9 +233,9 @@ std::ostream &operator<<(std::ostream &os, Game &dt) {
         return os;
     }
     for (int i = 0; i < dt.num_teams(); i++) {
-        // if (DEBUG && dt.current_team_idx == i) {
-        //     os << "> ";
-        // }
+        if (dt.current_team_idx == i) {
+            os << "> ";
+        }
         os << "Team " << i + 1 << ": " << *(dt.get_team(i)) << std::endl;
     }
     return os;

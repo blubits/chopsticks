@@ -120,14 +120,11 @@ char Player::get_type() { return player_type; }
 
 std::ostream &operator<<(std::ostream &os, Player &dt) {
     os << "P" << dt.player_order << dt.player_type;
-    if (DEBUG) {
-        os << " [";
-        os << dt.actions_remaining;
-        os << "]";
-        os << "[";
-        os << !dt.is_skipped;
-        os << "]";
+    if (dt.is_dead()) {
+        os << " [dead]";
+        return os;
     }
+    if (dt.is_skipped) os << " [skipped]";
     os << " (";
     for (auto &h : dt.hands) os << (*h);
     os << ":";

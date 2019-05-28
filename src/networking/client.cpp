@@ -18,7 +18,7 @@ void Client::play() {
             std::cout << line << std::endl;
         }
         if (code == static_cast<int>(CODES::REQUEST_NEW_INPUT)) {
-            std::cout << line << std::endl;
+            std::cout << line << std::endl << "> ";
             getline(std::cin, line);
             *socket << static_cast<int>(CODES::NEW_INPUT) << std::endl;
             *socket << line << std::endl;
@@ -37,15 +37,27 @@ void Client::play() {
 }
 
 void Client::start(char* ip, char* port) {
+    const std::string WELCOME_MESSAGE =
+        "+++++++++++++++++++++++++++++++++++++\n"
+        "+                                   +\n"
+        "+             CHOPSTICKS            +\n"
+        "+      Batara - Salinas - CS12      +\n"
+        "+                                   +\n"
+        "+++++++++++++++++++++++++++++++++++++";
     socket = new swoope::socketstream();
     socket->open(ip, port);
 
     if (!socket->is_open()) {
-        std::cout << "Failed to connect to server" << std::endl;
+        std::cout << "chopsticks: Failed to connect to server" << std::endl;
+        std::cout << "Check if the server is running or if your server IP and "
+                     "port are correct."
+                  << std::endl;
         return;
     }
     std::cout << "Connected to server at " << socket->remote_address()
-              << std::endl;
+              << " successfully. " << std::endl;
+
+    std::cout << WELCOME_MESSAGE << std::endl << std::endl;
 
     play();
 }
